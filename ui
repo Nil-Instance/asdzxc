@@ -2154,11 +2154,11 @@ end)
 -- Llama a la función para mostrar una notificación
 showNotification("¡New Updates!", "¡Loop Kill With Anti-Hit!", 5) -- Título, texto, duración
 
-local plrs = game:GetService('Players')
-local rep = game:GetService('ReplicatedStorage')
+local rep = game:GetService("ReplicatedStorage")
+local plrs = game:GetService("Players")
 local starterGui = game:GetService("StarterGui")
 
--- Crear una carpeta en ReplicatedStorage para guardar a los jugadores que usan el script
+-- Crear una carpeta en ReplicatedStorage para almacenar los jugadores que usan el script
 if not rep:FindFirstChild('PlayersUsingScript') then
     local playersUsingScript = Instance.new('Folder')
     playersUsingScript.Name = 'PlayersUsingScript'
@@ -2166,62 +2166,30 @@ if not rep:FindFirstChild('PlayersUsingScript') then
 end
 
 -- Función para agregar el jugador actual a la lista de usuarios del script
-local function AddPlayerToScriptList(player)
+local function RegisterPlayerUsingScript(player)
     if not rep.PlayersUsingScript:FindFirstChild(player.Name) then
-        local tag = Instance.new('StringValue')
-        tag.Name = player.Name
-        tag.Value = player.UserId
-        tag.Parent = rep.PlayersUsingScript
+        local marker = Instance.new('StringValue')
+        marker.Name = player.Name
+        marker.Value = player.UserId
+        marker.Parent = rep.PlayersUsingScript
         
-        -- Notificar a todos los jugadores sobre el nuevo usuario
+        -- Notificar cuando un nuevo jugador use el script
         starterGui:SetCore("SendNotification", {
-            Title = "Nuevo usuario detectado",
+            Title = "Nuevo jugador detectado",
             Text = player.Name .. " está usando el script.",
             Duration = 5
         })
     end
 end
 
--- Función para notificar qué jugadores están usando el script
-local function NotifyOtherPlayersUsingScript()
-    for _, tag in pairs(rep.PlayersUsingScript:GetChildren()) do
-        if tag.Name ~= plrs.LocalPlayer.Name then
-            starterGui:SetCore("SendNotification", {
-                Title = "Jugador detectado",
-                Text = tag.Name .. " está usando el script.",
-                Duration = 5
-            })
-        end
-    end
-end
+-- Añadir el jugador local (quien ejecuta este script) a la lista
+RegisterPlayerUsingScript(plrs.LocalPlayer)
 
--- Añadir el jugador local a la lista cuando ejecuta el script
-AddPlayerToScriptList(plrs.LocalPlayer)
-
--- Notificar a los jugadores existentes que están usando el script
-NotifyOtherPlayersUsingScript()
-
--- Cuando un jugador nuevo se une al servidor, lo añadimos a la lista y notificamos
-plrs.PlayerAdded:Connect(function(player)
-    player.CharacterAdded:Connect(function()
-        wait(1) -- Espera a que el personaje cargue completamente
-        AddPlayerToScriptList(player)
-    end)
-end)
-
--- Cuando un jugador sale, eliminamos su entrada de la lista
-plrs.PlayerRemoving:Connect(function(player)
-    local tag = rep.PlayersUsingScript:FindFirstChild(player.Name)
-    if tag then
-        tag:Destroy()
-    end
-end)
-
--- Función para expulsar a un jugador por nombre parcial
+-- Función para expulsar jugadores por nombre parcial
 local function KickPlayer(playerName)
     for _, player in pairs(plrs:GetPlayers()) do
         if player.Name:lower():sub(1, #playerName) == playerName:lower() then
-            player:Kick("Has sido expulsado por usar este script.")
+            player:Kick("Has sido expulsado por usar el script.")
             starterGui:SetCore("SendNotification", {
                 Title = "Jugador expulsado",
                 Text = player.Name .. " ha sido expulsado.",
@@ -2231,12 +2199,24 @@ local function KickPlayer(playerName)
     end
 end
 
--- Monitorear el chat para detectar el comando :kick
+-- Monitorear el chat para el comando :kick
 plrs.LocalPlayer.Chatted:Connect(function(message)
     if message:sub(1, 5) == ":kick" then
         local playerName = message:sub(7)  -- Obtener el nombre después de :kick
         KickPlayer(playerName)
     end
 end)
+
+-- Notificar cuando otros jugadores ya están usando el script
+for _, marker in pairs(rep.PlayersUsingScript:GetChildren()) do
+    if marker.Name ~= plrs.LocalPlayer.Name then
+        starterGui:SetCore("SendNotification", {
+            Title = "Jugador detectado",
+            Text = marker.Name .. " ya está usando el script.",
+            Duration = 5
+        })
+    end
+end
+
 
 
