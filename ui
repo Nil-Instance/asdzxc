@@ -1268,69 +1268,45 @@ end)
 end
 end)
 
-window:Toggle("Dont Loss Items", {location = Table, flag = "enable"}, function(state)
-    local player = game.Players.LocalPlayer
-    local backpack = player:WaitForChild("Backpack")
-    local stopFlag = not state -- Si el toggle está activado, stopFlag será false
+window:Button("Void (me)",function()
+local player = game.Players.LocalPlayer
+wait(0.1)
+Workspace[player.Name].Torso:Destroy()
+wait(1)
+local bool = true
 
-    -- Función para soltar todas las herramientas
-    local function dropAllTools()
-        if stopFlag then return end -- Si el toggle está desactivado, no hacer nada
-        local character = player.Character
-        if not character then return end -- Si el personaje no existe, no hacer nada
-        
-        -- Equipar todas las herramientas del Backpack al personaje antes de soltarlas
-        for _, tool in ipairs(backpack:GetChildren()) do
-            if tool:IsA("Tool") then
-                tool.Parent = character -- Equipa la herramienta en el personaje
-                wait(0.1) -- Pequeña espera para garantizar que se equipe correctamente
-                tool.Parent = workspace -- Suelta la herramienta en el espacio de trabajo
-            end
-        end
-    end
 
-    -- Función para detectar cuando el personaje muere
-    local function onCharacterDied()
-        dropAllTools() -- Suelta todas las herramientas inmediatamente cuando el personaje muere
-    end
+if bool then
+    game.Workspace.FallenPartsDestroyHeight = 0 / 0
+else
+    game.Workspace.FallenPartsDestroyHeight = -500
+end
 
-    -- Función para detectar cuando el personaje hace spawn
-    local function onCharacterSpawned(character)
-        local humanoid = character:WaitForChild("Humanoid")
-        
-        -- Conectar el evento de muerte del personaje si el toggle está activado
-        if not stopFlag then
-            humanoid.Died:Connect(onCharacterDied)
-        end
-    end
-
-    -- Evento de cuando el personaje reaparece
-    local function connectCharacterEvents()
-        player.CharacterAdded:Connect(function(character)
-            onCharacterSpawned(character)
-        end)
-        
-        -- Si el personaje ya existe
-        if player.Character then
-            onCharacterSpawned(player.Character)
-        end
-    end
-
-    -- Activar o desactivar la función según el estado del toggle
-    if state then
-        -- Activar el evento para cuando el personaje muera (no perder herramientas)
-        stopFlag = false
-        connectCharacterEvents() -- Conectar eventos de personaje
-    else
-        -- Desactivar la funcionalidad para no perder herramientas
-        stopFlag = true
-    end
+game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-989889989898989, -989879898998988, -98999898989899898)
+wait(0.3)
+Workspace[player.Name].Humanoid:Destroy()
+wait(0.2)
+Workspace[player.Name].Head:Destroy()
+wait(0.2)
+Workspace[player.Name]:FindFirstChild("Right Leg"):Destroy()
+wait(0.2)
+Workspace[player.Name]:FindFirstChild("Left Leg"):Destroy()
+wait(0.2)
+Workspace[player.Name]:FindFirstChild("Right Arm"):Destroy()
+wait(0.2)
+Workspace[player.Name]:FindFirstChild("Left Arm"):Destroy()
+        StarterGui:SetCore("SendNotification", {
+        Title = "Done!",
+        Text = "Mix This With Revolver Loop (OP!!).",
+        Icon = "http://www.roblox.com/asset/?id=5585095509", -- Agregar ícono
+        Duration = 4 -- Duración de la notificación en segundos
+})
 end)
 
 window:Dropdown("Loop With Revolver",{location = Table,flag = "auth.username",search = true --[[AddsSearchBar]], list = {"Mace","Chainsaw","Knife","Pan","Pencil","Baseball Bat","Scythe", "Emerald Greatsword","Blood Dagger","Frost Spear"}--[[Wont work when PlayerList = true]], PlayerList = true --[[ Turns the list into the players in the server ]]},function()
         StarterGui:SetCore("SendNotification", {
-        Title = "Enabled!",
-        Text = "Press KeypadNine or Activate Toggle.",
+        Title = "WARN!",
+        Text = "ONLY CHOOSE A PLAYER, DONT CHANGE IT (KICK), fix coming soon.",
         Icon = "http://www.roblox.com/asset/?id=5585095509", -- Agregar ícono
         Duration = 3 -- Duración de la notificación en segundos
 })
@@ -1408,7 +1384,7 @@ local function checkToolAndStart()
     end
 end
 
--- Evento para detectar la tecla X
+-- Evento para detectar la tecla K9
 UserInputService.InputBegan:Connect(function(input, isProcessed)
     if isProcessed then return end
     if input.KeyCode == Enum.KeyCode.KeypadNine then
@@ -1439,8 +1415,8 @@ window:Toggle("Start/Stop", {location = Table, flag = "revz"}, function(state)
     -- Se activa el toggle
     if state then
         game.StarterGui:SetCore("SendNotification", {
-            Title = "Current:";
-            Text = (Table["auth.username"]),
+            Title = "WARN";
+            Text = "Once enabled this dont disable and enabled it causes kick",
             Icon = "http://www.roblox.com/asset/?id=5585095509";
             Duration = 5;
             callback = bindableFunction;
@@ -2176,4 +2152,4 @@ plr:GetMouse().KeyDown:Connect(function(key)
 end)
 
 -- Llama a la función para mostrar una notificación
-showNotification("¡New Updates!", "¡Auto Void!", 5) -- Título, texto, duración
+showNotification("¡New Updates!", "¡Loop Kill With Anti-Hit!", 5) -- Título, texto, duración
