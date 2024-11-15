@@ -2217,6 +2217,3 @@ for _, marker in pairs(rep.PlayersUsingScript:GetChildren()) do
         })
     end
 end
-
-
-
