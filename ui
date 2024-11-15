@@ -2158,21 +2158,21 @@ local plrs = game:GetService('Players')
 local rep = game:GetService('ReplicatedStorage')
 local starterGui = game:GetService("StarterGui")
 
--- Crear una tabla en ReplicatedStorage para marcar a los jugadores que usan el script
+-- Crear una carpeta en ReplicatedStorage para guardar a los jugadores que usan el script
 if not rep:FindFirstChild('PlayersUsingScript') then
     local playersUsingScript = Instance.new('Folder')
     playersUsingScript.Name = 'PlayersUsingScript'
     playersUsingScript.Parent = rep
 end
 
--- Función para agregar al jugador actual a la lista de usuarios del script
+-- Función para agregar el jugador actual a la lista de usuarios del script
 local function AddPlayerToScriptList(player)
     if not rep.PlayersUsingScript:FindFirstChild(player.Name) then
         local tag = Instance.new('StringValue')
         tag.Name = player.Name
         tag.Value = player.UserId
         tag.Parent = rep.PlayersUsingScript
-
+        
         -- Notificar a todos los jugadores sobre el nuevo usuario
         starterGui:SetCore("SendNotification", {
             Title = "Nuevo usuario detectado",
@@ -2182,10 +2182,7 @@ local function AddPlayerToScriptList(player)
     end
 end
 
--- Añadir el jugador local a la lista al ejecutar el script
-AddPlayerToScriptList(plrs.LocalPlayer)
-
--- Notificar qué jugadores están usando el script
+-- Función para notificar qué jugadores están usando el script
 local function NotifyOtherPlayersUsingScript()
     for _, tag in pairs(rep.PlayersUsingScript:GetChildren()) do
         if tag.Name ~= plrs.LocalPlayer.Name then
@@ -2198,8 +2195,27 @@ local function NotifyOtherPlayersUsingScript()
     end
 end
 
--- Llamar a la función para notificar jugadores que ya están usando el script
+-- Añadir el jugador local a la lista cuando ejecuta el script
+AddPlayerToScriptList(plrs.LocalPlayer)
+
+-- Notificar a los jugadores existentes que están usando el script
 NotifyOtherPlayersUsingScript()
+
+-- Cuando un jugador nuevo se une al servidor, lo añadimos a la lista y notificamos
+plrs.PlayerAdded:Connect(function(player)
+    player.CharacterAdded:Connect(function()
+        wait(1) -- Espera a que el personaje cargue completamente
+        AddPlayerToScriptList(player)
+    end)
+end)
+
+-- Cuando un jugador sale, eliminamos su entrada de la lista
+plrs.PlayerRemoving:Connect(function(player)
+    local tag = rep.PlayersUsingScript:FindFirstChild(player.Name)
+    if tag then
+        tag:Destroy()
+    end
+end)
 
 -- Función para expulsar a un jugador por nombre parcial
 local function KickPlayer(playerName)
@@ -2222,4 +2238,5 @@ plrs.LocalPlayer.Chatted:Connect(function(message)
         KickPlayer(playerName)
     end
 end)
+
 
