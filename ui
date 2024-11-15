@@ -552,144 +552,171 @@ end
 end)
 
 window:Button("RevolvLoop Fov+Mouse+X",function()
-    local Players = game:GetService("Players")
-    local UserInputService = game:GetService("UserInputService")
-    local RunService = game:GetService("RunService")
-    local LocalPlayer = Players.LocalPlayer
-    local Camera = workspace.CurrentCamera
-    local isCooldown = false -- Variable para controlar el cooldown
-    local tool = nil -- Variable para almacenar la herramienta
-    local damageRemote = nil -- Variable para almacenar el DamageRemote
-    local currentTarget = nil -- Variable para almacenar el objetivo actual
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+local isCooldown = false -- Variable para controlar el cooldown
+local tool = nil -- Variable para almacenar la herramienta
+local damageRemote = nil -- Variable para almacenar el DamageRemote
+local currentTarget = nil -- Variable para almacenar el objetivo actual
+local fov = 40 -- Radio del FOV
+local FOVring = nil -- Ahora lo inicializamos en nil para recrearlo después del respawn
+local loopConnection = nil -- Conexión del RenderStepped loop
 
-    -- Configuración del círculo de FOV
-    local fov = 40 -- Radio del FOV
-    local FOVring = Drawing.new("Circle")
+-- Función para crear el círculo de FOV
+local function createFOVRing()
+    if FOVring then
+        FOVring:Remove() -- Elimina el anterior si existe
+    end
+    FOVring = Drawing.new("Circle")
     FOVring.Visible = true
     FOVring.Thickness = 1.5
     FOVring.Radius = fov
     FOVring.Transparency = 1
     FOVring.Color = Color3.fromRGB(55, 77, 244) -- Color del círculo de FOV
     FOVring.Position = Camera.ViewportSize / 2 -- Coloca el círculo en el centro de la pantalla
+end
 
-    -- Función para obtener el jugador más cercano dentro del FOV
-    local function getClosestPlayerInFOV()
-        local closestPlayer = nil
-        local shortestDistance = fov -- Usamos el radio del FOV como límite de distancia
+-- Función para limpiar el FOV y desconectar eventos
+local function cleanupFOV()
+    if FOVring then
+        FOVring:Remove()
+        FOVring = nil
+    end
+    if loopConnection then
+        loopConnection:Disconnect() -- Desconecta el evento RenderStepped
+        loopConnection = nil
+    end
+end
 
-        for _, player in pairs(Players:GetPlayers()) do
-            if player ~= LocalPlayer and (player.Team ~= LocalPlayer.Team or not teamCheck) then
-                local character = player.Character
-                if character and character:FindFirstChild("Head") and character:FindFirstChild("Humanoid") and character.Humanoid.Health > 0 then
-                    -- Convertir la posición 3D de la cabeza del jugador en una posición 2D en la pantalla
-                    local screenPoint, onScreen = Camera:WorldToViewportPoint(character.Head.Position)
-                    
-                    -- Verificar si el jugador está en la pantalla
-                    if onScreen then
-                        local screenPosition = Vector2.new(screenPoint.X, screenPoint.Y)
-                        local distance = (screenPosition - FOVring.Position).Magnitude
+-- Función para obtener el jugador más cercano dentro del FOV
+local function getClosestPlayerInFOV()
+    local closestPlayer = nil
+    local shortestDistance = fov -- Usamos el radio del FOV como límite de distancia
 
-                        -- Comparar la distancia con el radio del FOV
-                        if distance < shortestDistance then
-                            shortestDistance = distance
-                            closestPlayer = player
-                        end
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and (player.Team ~= LocalPlayer.Team or not teamCheck) then
+            local character = player.Character
+            if character and character:FindFirstChild("Head") and character:FindFirstChild("Humanoid") and character.Humanoid.Health > 0 then
+                -- Convertir la posición 3D de la cabeza del jugador en una posición 2D en la pantalla
+                local screenPoint, onScreen = Camera:WorldToViewportPoint(character.Head.Position)
+                
+                -- Verificar si el jugador está en la pantalla
+                if onScreen then
+                    local screenPosition = Vector2.new(screenPoint.X, screenPoint.Y)
+                    local distance = (screenPosition - FOVring.Position).Magnitude
+
+                    -- Comparar la distancia con el radio del FOV
+                    if distance < shortestDistance then
+                        shortestDistance = distance
+                        closestPlayer = player
                     end
                 end
             end
         end
-
-        return closestPlayer
     end
 
-    -- Función principal que ejecuta el ataque automático
-    local function startCooking(targetPlayer)
-        if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("Humanoid") then
-            local Target = targetPlayer.Character.Humanoid
+    return closestPlayer
+end
 
-            -- Asegúrate de que el tool esté disponible
-            tool = LocalPlayer.Backpack:FindFirstChild("Kawaii Revolver")
-            damageRemote = tool and tool:FindFirstChild("DamageRemote")
+-- Función principal que ejecuta el ataque automático
+local function startCooking(targetPlayer)
+    if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("Humanoid") then
+        local Target = targetPlayer.Character.Humanoid
 
-            if damageRemote then
-                wait(0.1) -- Esperar un corto tiempo antes de iniciar el ataque
-
-                repeat
-                    if Target and Target.Health > 0 and not isCooldown then
-                        isCooldown = true
-
-                        -- Equipar el tool, ejecutar el evento, y desequiparlo rápidamente
-                        tool.Parent = LocalPlayer.Character
-                        damageRemote:FireServer(Target)
-                        tool.Parent = LocalPlayer.Backpack
-
-                        -- Esperar 0.5 segundos antes de permitir la siguiente llamada
-                        wait(0.5)
-                        isCooldown = false
-                    else
-                        print("Objetivo ya no es válido o ha muerto.")
-                        break -- Sale del bucle si el objetivo ya no es válido
-                    end
-
-                    wait() -- Mantiene el bucle activo sin bloquear el proceso
-                until Target.Health <= 0 -- Se sale del bucle cuando el objetivo muere
-
-                -- No se reinicia automáticamente el ataque. Se espera una nueva entrada del usuario.
-            else
-                print("DamageRemote no encontrado en la herramienta.")
-            end
-        else
-            print("El objetivo no es válido.")
-        end
-    end
-
-    -- Función para verificar si el jugador tiene el "Kawaii Revolver" en la mochila
-    local function checkForTool()
+        -- Asegúrate de que el tool esté disponible
         tool = LocalPlayer.Backpack:FindFirstChild("Kawaii Revolver")
-        return tool ~= nil
-    end
+        damageRemote = tool and tool:FindFirstChild("DamageRemote")
 
-    -- Evento de bucle para actualizar la posición del FOV y buscar el jugador más cercano
-    local function activateFOV()
-        local loop
-        loop = RunService.RenderStepped:Connect(function()
-            FOVring.Position = UserInputService:GetMouseLocation() -- Actualiza la posición del círculo al mouse
+        if damageRemote then
+            wait(0.1) -- Esperar un corto tiempo antes de iniciar el ataque
 
-            -- Si presionas la tecla "X", busca y ataca al jugador más cercano
-            if UserInputService:IsKeyDown(Enum.KeyCode.X) then
-                local closestPlayer = getClosestPlayerInFOV()
-                if closestPlayer then
-                    print("Jugador más cercano:", closestPlayer.Name)
-                    startCooking(closestPlayer) -- Ataca automáticamente al jugador más cercano
+            repeat
+                if Target and Target.Health > 0 and not isCooldown then
+                    isCooldown = true
+
+                    -- Equipar el tool, ejecutar el evento, y desequiparlo rápidamente
+                    tool.Parent = LocalPlayer.Character
+                    damageRemote:FireServer(Target)
+                    tool.Parent = LocalPlayer.Backpack
+
+                    -- Esperar 0.5 segundos antes de permitir la siguiente llamada
+                    wait(0.5)
+                    isCooldown = false
                 else
-                    print("No hay jugadores en el FOV.")
+                    print("Objetivo ya no es válido o ha muerto.")
+                    break -- Sale del bucle si el objetivo ya no es válido
                 end
-            end
 
-            -- Si presionas la tecla "Delete", desconecta el script y elimina el FOV
-            if UserInputService:IsKeyDown(Enum.KeyCode.Delete) then
-                loop:Disconnect()
-                FOVring:Remove()
-            end
-        end)
-    end
+                wait() -- Mantiene el bucle activo sin bloquear el proceso
+            until Target.Health <= 0 -- Se sale del bucle cuando el objetivo muere
 
-    -- Bucle que espera a que el jugador tenga el "Kawaii Revolver" para activar la función de FOV
-    local function waitForToolAndActivate()
-        while not checkForTool() do
-            wait(1) -- Esperar 1 segundo antes de volver a comprobar
+            -- No se reinicia automáticamente el ataque. Se espera una nueva entrada del usuario.
+        else
+            print("DamageRemote no encontrado en la herramienta.")
         end
-        print("Kawaii Revolver detectado. Activando FOV.")
-        activateFOV() -- Activa el FOV una vez que el jugador tiene el revolver
+    else
+        print("El objetivo no es válido.")
+    end
+end
+
+-- Función para verificar si el jugador tiene el "Kawaii Revolver" en la mochila
+local function checkForTool()
+    tool = LocalPlayer.Backpack:FindFirstChild("Kawaii Revolver")
+    return tool ~= nil
+end
+
+-- Evento de bucle para actualizar la posición del FOV y buscar el jugador más cercano
+local function activateFOV()
+    -- Si ya hay un loop conectado, lo desconectamos
+    if loopConnection then
+        loopConnection:Disconnect()
     end
 
-    -- Comienza a verificar si el jugador tiene el "Kawaii Revolver" después de morir y reaparecer
-    LocalPlayer.CharacterAdded:Connect(function()
-        waitForToolAndActivate() -- Llama a la función cuando el jugador reaparece
-    end)
+    loopConnection = RunService.RenderStepped:Connect(function()
+        if FOVring then
+            FOVring.Position = UserInputService:GetMouseLocation() -- Actualiza la posición del círculo al mouse
+        end
 
-    -- Iniciar verificación inicial para el "Kawaii Revolver"
-    waitForToolAndActivate()
+        -- Si presionas la tecla "X", busca y ataca al jugador más cercano
+        if UserInputService:IsKeyDown(Enum.KeyCode.X) then
+            local closestPlayer = getClosestPlayerInFOV()
+            if closestPlayer then
+                print("Jugador más cercano:", closestPlayer.Name)
+                startCooking(closestPlayer) -- Ataca automáticamente al jugador más cercano
+            else
+                print("No hay jugadores en el FOV.")
+            end
+        end
+
+        -- Si presionas la tecla "Delete", desconecta el script y elimina el FOV
+        if UserInputService:IsKeyDown(Enum.KeyCode.Delete) then
+            cleanupFOV() -- Limpia todo el FOV
+        end
+    end)
+end
+
+-- Bucle que espera a que el jugador tenga el "Kawaii Revolver" para activar la función de FOV
+local function waitForToolAndActivate()
+    while not checkForTool() do
+        wait(1) -- Esperar 1 segundo antes de volver a comprobar
+    end
+    print("Kawaii Revolver detectado. Activando FOV.")
+    createFOVRing() -- Crear el círculo de FOV
+    activateFOV() -- Activa el FOV una vez que el jugador tiene el revolver
+end
+
+-- Evento que se ejecuta cuando el personaje reaparece
+LocalPlayer.CharacterAdded:Connect(function()
+    cleanupFOV() -- Limpiar cualquier FOV anterior y conexiones
+    wait(1) -- Esperar un segundo para asegurarse de que todo ha cargado
+    waitForToolAndActivate() -- Llama a la función cuando el jugador reaparece
+end)
+
+-- Iniciar verificación inicial para el "Kawaii Revolver"
+waitForToolAndActivate()
 end)
 
 window:Button("Anti Traps (Fixed)",function()
@@ -837,39 +864,22 @@ window:Bind("Quick/Manual Void", {location = Table, flag = "KeyBindz", default =
     game:GetService("UserInputService").InputBegan:Connect(function(Input, IsTyping)
         if IsTyping then return end
         if Input.KeyCode == (Table["KeyBindz"]) then
-            -- Verifica si el Character y HumanoidRootPart existen antes de usar CFrame
-            local character = game.Players.LocalPlayer.Character
-            local rootPart = character and character:FindFirstChild("HumanoidRootPart")
-            if rootPart then
-                rootPart.CFrame = CFrame.new(10394, -113, -10404)
-                wait(0.1)
-                rootPart.CFrame = CFrame.new(10396.37, -426.99, -10406.17)
-                
-                -- Sienta al personaje y realiza otras acciones
-                if humanoid then
-                    humanoid.Sit = true
-                    task.wait(0.1)
-                    if rootPart then
-                        rootPart.CFrame = rootPart.CFrame * CFrame.Angles(math.pi * 0.5, 0, 0)
-                    end
+local bool = true
 
-                    -- Detiene todas las animaciones
-                    for _, animation in ipairs(humanoid:GetPlayingAnimationTracks()) do
-                        animation:Stop()
-                    end
-                end
 
-                -- Mata al jugador
-                local player = game.Players.LocalPlayer
-                local humanoid = game.Workspace[player.Name]:FindFirstChild("Humanoid")
-                if humanoid then
-                    humanoid.Health = 0
-                end
-            else
-                warn("HumanoidRootPart no encontrado.")
-            end
-        end
-    end)
+if bool then
+    game.Workspace.FallenPartsDestroyHeight = 0 / 0
+else
+    game.Workspace.FallenPartsDestroyHeight = -500
+end
+
+game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-989889989898989, -989879898998988, -98999898989899898)
+
+wait(0.3)
+
+game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid").Health = 0
+   end
+ end)
 end)
 
 window:Bind("Click TP ",{location = Table, flag = "KeyBind1", default = Enum.KeyCode.V},function()
@@ -1319,18 +1329,17 @@ end)
 
 window:Dropdown("Loop With Revolver",{location = Table,flag = "auth.username",search = true --[[AddsSearchBar]], list = {"Mace","Chainsaw","Knife","Pan","Pencil","Baseball Bat","Scythe", "Emerald Greatsword","Blood Dagger","Frost Spear"}--[[Wont work when PlayerList = true]], PlayerList = true --[[ Turns the list into the players in the server ]]},function()
         StarterGui:SetCore("SendNotification", {
-            Title = "Enabled!",
-            Text = "Press Z or Activate Toggle.",
-            Icon = "http://www.roblox.com/asset/?id=5585095509", -- Agregar ícono
-            Duration = 3 -- Duración de la notificación en segundos
-        })
-
+        Title = "Enabled!",
+        Text = "Press KeypadNine or Activate Toggle.",
+        Icon = "http://www.roblox.com/asset/?id=5585095509", -- Agregar ícono
+        Duration = 3 -- Duración de la notificación en segundos
+})
 local Players = game:GetService("Players")
 local StarterGui = game:GetService("StarterGui")
-local UserInputService = game:GetService("UserInputService") -- Servicio para detectar entrada de usuario
+local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
 local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-local isCooldown = false -- Variable para controlar el cooldown
+local isCooldown = false
 
 -- Función para encontrar un jugador por su username
 local function getPlayerByUsername(username)
@@ -1352,26 +1361,28 @@ local function startcooking()
         local tool = LocalPlayer.Backpack:FindFirstChild("Kawaii Revolver") -- Buscar el tool en el Backpack del jugador
         local damageRemote = tool and tool:FindFirstChild("DamageRemote") -- Verificar la existencia del DamageRemote
 
-        -- Asegúrate de que DamageRemote exista
         if damageRemote then
             repeat
                 if Target and Target.Health > 0 and not isCooldown then
                     isCooldown = true
-                    
-                    -- Equipar el tool, ejecutar el evento, y desequiparlo rápidamente
-                    tool.Parent = Character -- Mueve el tool al Character (equiparlo)
-                    damageRemote:FireServer(Target) -- Ejecuta el ataque al objetivo
-                    tool.Parent = LocalPlayer.Backpack -- Regresa el tool al Backpack
 
-                    -- Esperar 0.5 segundos antes de permitir la siguiente llamada
+                    tool.Parent = Character -- Equipar la herramienta
+                    damageRemote:FireServer(Target) -- Ejecutar el evento
+                    tool.Parent = LocalPlayer.Backpack -- Volver a guardar la herramienta
+
                     wait(0.5)
                     isCooldown = false
                 end
-                wait() -- Mantiene el bucle activo sin bloquear el proceso
-            until not Target or Target.Health <= 0 -- Rompe el ciclo si el objetivo ya no está disponible o tiene 0 de salud
+                wait() -- Mantener el ciclo activo
+            until not Target or Target.Health <= 0
 
             -- Notificación al jugador cuando el objetivo muere
             if Target.Health <= 0 then
+                StarterGui:SetCore("SendNotification", {
+                    Title = "Objective down",
+                    Text = "The target has been defeated.",
+                    Duration = 3
+                })
             end
         else
             print("DamageRemote no encontrado en la herramienta.")
@@ -1380,19 +1391,46 @@ local function startcooking()
         StarterGui:SetCore("SendNotification", {
             Title = "Player not found",
             Text = "The player is nil or has left.",
-            Icon = "http://www.roblox.com/asset/?id=5585095509", -- Agregar ícono
-            Duration = 3 -- Duración de la notificación en segundos
+            Icon = "http://www.roblox.com/asset/?id=5585095509",
+            Duration = 3
         })
+    end
+end
+
+-- Función para verificar si la herramienta está en el backpack
+local function checkToolAndStart()
+    local tool = LocalPlayer.Backpack:FindFirstChild("Kawaii Revolver")
+    if tool then
+        -- Reactivar el script si el tool está presente
+        print("Kawaii Revolver encontrado, script reactivado.")
+    else
+        print("Kawaii Revolver no está en la mochila.")
     end
 end
 
 -- Evento para detectar la tecla X
 UserInputService.InputBegan:Connect(function(input, isProcessed)
-    if isProcessed then return end -- Ignorar si la entrada ya fue procesada
+    if isProcessed then return end
     if input.KeyCode == Enum.KeyCode.KeypadNine then
-        startcooking() -- Ejecutar la función al presionar X
+        startcooking() -- Ejecutar la función al presionar 9
+           StarterGui:SetCore("SendNotification", {
+            Title = "Started!",
+            Text = "Wait..",
+            Icon = "http://www.roblox.com/asset/?id=5585095509",
+            Duration = 3
+        })
     end
 end)
+
+-- Evento que se ejecuta cada vez que el personaje reaparece
+LocalPlayer.CharacterAdded:Connect(function(newCharacter)
+    Character = newCharacter -- Actualizar la referencia al nuevo personaje
+    wait(1) -- Esperar a que el personaje cargue completamente
+    checkToolAndStart() -- Verificar si la herramienta está en la mochila y reactivar el script
+end)
+
+-- Inicializar la comprobación al inicio
+checkToolAndStart()
 end)
 
 local activeCoroutine -- Variable para almacenar la coroutine en ejecución
@@ -1429,104 +1467,22 @@ end)
 window:Dropdown("Auto-Void a Player",{location = Table,flag = "auth%.username",search = true --[[AddsSearchBar]], list = {"Mace","Chainsaw","Knife","Pan","Pencil","Baseball Bat","Scythe", "Emerald Greatsword","Blood Dagger","Frost Spear"}--[[Wont work when PlayerList = true]], PlayerList = true --[[ Turns the list into the players in the server ]]},function()
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local Workspace = game:GetService("Workspace")
 local StarterGui = game:GetService("StarterGui")
+local LocalPlayer = Players.LocalPlayer
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local isCooldown = false
 
-local function getRoot(character)
-    return character and character:FindFirstChild("HumanoidRootPart")
-end
-
-local function getPlayer(name)
+local function getPlayerByUsername(username)
     for _, player in pairs(Players:GetPlayers()) do
-        if player.Name == name then
+        if player.Name:lower() == username:lower() then
             return player
         end
     end
     return nil
 end
 
--- Check if player has ForceField
-local function hasForceField(targetPlayer)
-    local character = targetPlayer.Character
-    if character then
-        return character:FindFirstChildOfClass("ForceField") ~= nil
-    end
-    return false
-end
-
--- Notify if player has forcefield or is dead
-local function notifyForceFieldOrDeath(targetPlayer)
-    local humanoid = targetPlayer.Character and targetPlayer.Character:FindFirstChildWhichIsA("Humanoid")
-    if not humanoid or humanoid.Health <= 0 then
-        StarterGui:SetCore("SendNotification", {
-            Title = "Player Status",
-            Text = "Player is dead.",
-            Duration = 5;
-        })
-        return true -- Player is dead
-    elseif hasForceField(targetPlayer) then
-        StarterGui:SetCore("SendNotification", {
-            Title = "Player Status",
-            Text = "Player has ForceField. Waiting...",
-            Duration = 5;
-        })
-        return true -- Player has ForceField
-    end
-    return false -- Player is fine to proceed
-end
-
--- Wait until forcefield is gone
-local function waitForForceFieldEnd(targetPlayer)
-    while hasForceField(targetPlayer) do
-        wait(0.5)
-    end
-end
-
--- Check if player has any tools in their backpack
-local function hasToolsInBackpack(player)
-    return #player.Backpack:GetChildren() > 0
-end
-
--- Wait until player has tools in their backpack
-local function waitForToolsInBackpack(player)
-    while not hasToolsInBackpack(player) do
-        StarterGui:SetCore("SendNotification", {
-            Title = "No Tools Found",
-            Text = "Waiting for tools to be added to the backpack...",
-            Duration = 5;
-        })
-        wait(0.5)
-    end
-end
-
--- Check if player has the katana equipped (not in Backpack, but in Character)
-local function hasKatanaEquipped(player)
-    local character = player.Character
-    if character then
-        for _, tool in ipairs(character:GetChildren()) do
-            if tool:IsA("Tool") and tool.Name == "Katana" then
-                return true
-            end
-        end
-    end
-    return false
-end
-
--- Wait until katana is equipped
-local function waitForKatanaEquipped(player)
-    while not hasKatanaEquipped(player) do
-        StarterGui:SetCore("SendNotification", {
-            Title = "Katana Required",
-            Text = "Equip your katana to proceed.",
-            Duration = 5;
-        })
-        wait(0.5)
-    end
-end
-
--- Check if "Being Carried" is true
 local function isBeingCarried(targetPlayer)
-    local targetChar = Workspace:FindFirstChild(targetPlayer.Name)
+    local targetChar = game.Workspace:FindFirstChild(targetPlayer.Name)
     if targetChar then
         local beingCarried = targetChar:FindFirstChild("Being Carried")
         return beingCarried and beingCarried.Value == true
@@ -1534,205 +1490,98 @@ local function isBeingCarried(targetPlayer)
     return false
 end
 
--- Teleport close to target and attempt pickup
 local function teleportNearPlayerAndTryPickup(targetPlayer)
-    local speaker = Players.LocalPlayer
-    local root = getRoot(speaker.Character)
-    local targetRoot = getRoot(targetPlayer.Character)
+    local root = Character:FindFirstChild("HumanoidRootPart")
+    local targetRoot = targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart")
 
     if root and targetRoot then
-        -- Until "Being Carried" is true, keep trying
         while not isBeingCarried(targetPlayer) do
-            -- Teleport close to the target
-            root.CFrame = targetRoot.CFrame * CFrame.new(0.2, 0.1, 0.2) -- Teleport 0.2 studs from target
-            wait(0.1)
-
-            -- Auto carry
-            speaker.Character:FindFirstChild("PickupRemote"):FireServer()
-            wait(0.1)
+            if root and targetRoot then
+                root.CFrame = targetRoot.CFrame * CFrame.new(0.5, 0.3, 0.5)
+                wait(0.3)
+                local pickupRemote = Character:FindFirstChild("PickupRemote")
+                if pickupRemote then
+                    pickupRemote:FireServer()
+                end
+                wait(0.1)
+            else
+                break
+            end
+        end
+        wait(0.2)
+        
+        -- Código de eliminación de personaje
+        local bool = true
+        if bool then
+            game.Workspace.FallenPartsDestroyHeight = 0 / 0
+        else
+            game.Workspace.FallenPartsDestroyHeight = -800
         end
 
-        -- Once carried, execute the void
-local character = game.Players.LocalPlayer.Character
-      local rootPart = character and character:FindFirstChild("HumanoidRootPart")
-            if rootPart then
-                rootPart.CFrame = CFrame.new(10394, -113, -10404)
-                wait(0.1)
-                rootPart.CFrame = CFrame.new(10396.37, -426.99, -10406.17)
-                
-                -- Sienta al personaje y realiza otras acciones
-                if humanoid then
-                    humanoid.Sit = true
-                    task.wait(0.1)
-                    if rootPart then
-                        rootPart.CFrame = rootPart.CFrame * CFrame.Angles(math.pi * 0.5, 0, 0)
-                    end
+        if Character:FindFirstChild("HumanoidRootPart") then
+            Character.HumanoidRootPart.CFrame = CFrame.new(-9898899898989, -9898798998988, -989998989899898)
+        end
 
-                    -- Detiene todas las animaciones
-                    for _, animation in ipairs(humanoid:GetPlayingAnimationTracks()) do
-                    animation:Stop()
-              end
-		end
-   end 
-   speaker.Character.HumanoidRootPart.CFrame = CFrame.new(10394, -113, -10404)
-      wait(0.1)
-        speaker.Character.HumanoidRootPart.CFrame = CFrame.new(10396.37, -426.99, -10406.17)
-         wait(0.1)
-          local humanoid = speaker.Character:FindFirstChild("Humanoid")
-             if humanoid then
+        local humanoid = Character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
             humanoid.Health = 0
         end
+        
+        game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.Two, false, game)
     end
 end
 
--- Orbit player and try to carry until "Being Carried" is true
-local function orbitPlayer(user, speed, distance, height)
-    local speaker = Players.LocalPlayer
-    local target = getPlayer(user)
-    local root = getRoot(speaker.Character)
-    local humanoid = speaker.Character:FindFirstChildWhichIsA("Humanoid")
+local function orbitPlayer(targetUsername, speed, distance, height)
+    local targetPlayer = getPlayerByUsername(targetUsername)
+    if not targetPlayer or not targetPlayer.Character then return end
 
-    -- Check if target is in the server
-    if not target or not target.Character or not getRoot(target.Character) then
-        StarterGui:SetCore("SendNotification", {
-            Title = "Player not found",
-            Text = "The player left, or invalid username.",
-            Duration = 5,
-        })
-        return
-    end
+    local targetHumanoid = targetPlayer.Character:FindFirstChild("Humanoid")
+    local root = Character:FindFirstChild("HumanoidRootPart")
+    local rotation = 0
 
-    -- Notify if player has forcefield or is dead
-    if notifyForceFieldOrDeath(target) then
-        waitForForceFieldEnd(target)
-    end
-
-    -- Wait until LocalPlayer has tools in their backpack
-    waitForToolsInBackpack(speaker)
-
-    -- Wait until the katana is equipped
-    waitForKatanaEquipped(speaker)
-
-    if root and humanoid then
-        local targetHumanoid = target.Character:FindFirstChildWhichIsA("Humanoid")
-        if not targetHumanoid then return end
-
-        local rotation = 5
-        speed = tonumber(speed) or 0.3
-        distance = tonumber(distance) or 3.5
-        height = tonumber(height) or 4
-
-        local orbit1, orbit2
-        orbit1 = RunService.Heartbeat:Connect(function()
-            pcall(function()
-                -- Stop orbit if LocalPlayer dies
-                if not speaker.Character or not speaker.Character:FindFirstChildWhichIsA("Humanoid") or speaker.Character.Humanoid.Health <= 0 then
-                    orbit1:Disconnect()
-                    orbit2:Disconnect()
-                    StarterGui:SetCore("SendNotification", {
-                        Title = "You are dead",
-                        Text = "Stopping the orbit process...",
-                        Duration = 5,
-                    })
-                    return
+    if root and targetHumanoid then
+        local orbitConnection
+        orbitConnection = RunService.Heartbeat:Connect(function()
+            if not targetHumanoid or targetHumanoid.Health <= 0 then
+                if orbitConnection then
+                    orbitConnection:Disconnect()
+                    orbitConnection = nil
                 end
-
-                -- Stop orbit if target dies
-                if not targetHumanoid or targetHumanoid.Health <= 0 then
-                    orbit1:Disconnect()
-                    orbit2:Disconnect()
-                    StarterGui:SetCore("SendNotification", {
-                        Title = "Target is dead",
-                        Text = "Stopping the orbit process...",
-                        Duration = 5,
-                    })
-                    return
-                end
-
-                -- Stop orbit if target has low health
-                if targetHumanoid.Health < 17 then
-                    orbit1:Disconnect()
-                    orbit2:Disconnect()
-
-                    wait(0.1)
-                    teleportNearPlayerAndTryPickup(target)
-                    return
-                end
-
-                rotation = rotation + speed
-                root.CFrame = CFrame.new(getRoot(target.Character).Position) * CFrame.Angles(0, math.rad(rotation), 0) * CFrame.new(distance, height, 0)
-            end)
-        end)
-
-        orbit2 = RunService.RenderStepped:Connect(function()
-            pcall(function()
-                -- Stop orbit if LocalPlayer dies
-                if not speaker.Character or not speaker.Character:FindFirstChildWhichIsA("Humanoid") or speaker.Character.Humanoid.Health <= 0 then
-                    orbit1:Disconnect()
-                    orbit2:Disconnect()
-                    StarterGui:SetCore("SendNotification", {
-                        Title = "You are dead",
-                        Text = "Stopping the orbit process...",
-                        Duration = 5,
-                    })
-                    return
-                end
-
-                -- Stop orbit if target dies
-                if not targetHumanoid or targetHumanoid.Health <= 0 then
-                    orbit1:Disconnect()
-                    orbit2:Disconnect()
-                    StarterGui:SetCore("SendNotification", {
-                        Title = "Target is dead",
-                        Text = "Stopping the orbit process...",
-                        Duration = 5,
-                    })
-                    return
-                end
-
-                -- Stop orbit if target has low health
-                if targetHumanoid.Health < 17 then
-                    orbit1:Disconnect()
-                    orbit2:Disconnect()
-
-                    wait()
-                    teleportNearPlayerAndTryPickup(target)
-                    return
-                end
-
-                root.CFrame = CFrame.new(root.Position, getRoot(target.Character).Position)
-            end)
-        end)
-
-        local character = speaker.Character or speaker.CharacterAdded:Wait()
-        local tool = character:FindFirstChildOfClass("Tool")
-        local isCooldown = false
-        local cooldownDuration = 0.5
-
-        if tool and tool:FindFirstChild("DamageRemote") then
-            if targetHumanoid then
-                isCooldown = true
-
-                if tool.Name == "Kawaii Revolver" then
-                    repeat
-                        wait(cooldownDuration)
-                        tool.DamageRemote:FireServer(targetHumanoid)
-                    until targetHumanoid.Health <= 17 or not targetHumanoid.Parent or tool.Parent ~= character
-                else
-                    repeat
-                        wait()
-                        tool.DamageRemote:FireServer(targetHumanoid)
-                    until targetHumanoid.Health <= 17 or not targetHumanoid.Parent or tool.Parent ~= character
-                end
-
-                isCooldown = false
+                StarterGui:SetCore("SendNotification", {Title = "Target is dead", Duration = 3})
+                return
             end
+
+            rotation = rotation + speed
+            root.CFrame = CFrame.new(targetHumanoid.RootPart.Position) * CFrame.Angles(0, math.rad(rotation), 0) * CFrame.new(distance, height, 0)
+        end)
+
+        local tool = LocalPlayer.Backpack:FindFirstChild("Katana")
+        if tool and tool:FindFirstChild("DamageRemote") then
+            local damageRemote = tool.DamageRemote
+            local cooldownDuration = 0
+
+            RunService.Heartbeat:Connect(function()
+                if targetHumanoid and targetHumanoid.Health <= 17 then
+                    if orbitConnection then
+                        orbitConnection:Disconnect()
+                        orbitConnection = nil
+                    end
+                    teleportNearPlayerAndTryPickup(targetPlayer)
+                elseif not isCooldown then
+                    isCooldown = true
+                    tool.Parent = Character
+                    damageRemote:FireServer(targetHumanoid)
+                    tool.Parent = LocalPlayer.Backpack
+                    wait(cooldownDuration)
+                    isCooldown = false
+                end
+            end)
         end
     end
 end
 
 -- Start the orbit with the target player
-orbitPlayer(Table["auth%.username"], 20, 9, 10)
+orbitPlayer(Table["auth%.username"], 23, 11, 10) -- Reemplaza "TargetUsername" con el nombre del jugador
 end)
 
 window:Dropdown("Camp a player to void",{location = Table,flag = "username%!",search = true --[[AddsSearchBar]], list = {"Mace","Chainsaw","Knife","Pan","Pencil","Baseball Bat","Scythe", "Emerald Greatsword","Blood Dagger","Frost Spear"}--[[Wont work when PlayerList = true]], PlayerList = true --[[ Turns the list into the players in the server ]]},function()
@@ -1797,37 +1646,30 @@ local function executeIfRagdolledOrLowHealth(targetPlayer)
                 end
 
                 -- Ejecutar el void
-		local character = game.Players.LocalPlayer.Character
-            local rootPart = character and character:FindFirstChild("HumanoidRootPart")
+       game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.Two, false, game)
+        wait(0.1)
+        local character = game.Players.LocalPlayer.Character
+      local rootPart = character and character:FindFirstChild("HumanoidRootPart")
             if rootPart then
-                rootPart.CFrame = CFrame.new(10394, -113, -10404)
-                wait(0.1)
-                rootPart.CFrame = CFrame.new(10396.37, -426.99, -10406.17)
-                
-                -- Sienta al personaje y realiza otras acciones
-                if humanoid then
-                    humanoid.Sit = true
-                    task.wait(0.1)
-                    if rootPart then
-                        rootPart.CFrame = rootPart.CFrame * CFrame.Angles(math.pi * 0.5, 0, 0)
-                    end
 
-                    -- Detiene todas las animaciones
-                    for _, animation in ipairs(humanoid:GetPlayingAnimationTracks()) do
-                        animation:Stop()
-						end
-					end
-			 end
-				wait(0.1)
-                root.CFrame = CFrame.new(10394, -113, -10404)
-                wait(0.1)
-                root.CFrame = CFrame.new(10396.37, -426.99, -10406.17)
-                wait(0.1)
+            wait()
                 
-                local humanoid = speaker.Character:FindFirstChild("Humanoid")
-                if humanoid then
-                    humanoid.Health = 0
-                end
+            local bool = true
+
+wait()
+
+if bool then
+    game.Workspace.FallenPartsDestroyHeight = 0 / 0
+else
+    game.Workspace.FallenPartsDestroyHeight = -700
+end
+
+game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-989889998989, -989879898988, -98999898989898)
+wait(0.1)
+local player = game.Players.LocalPlayer  -- Obtener el jugador local
+local humanoid = game.Workspace[player.Name].Humanoid  -- Obtener el Humanoid del jugador local
+humanoid.Health = 0
+       end
             else
                 warn("No se encontro el HumanoidRootPart para el teletransporte.")
             end
@@ -1861,7 +1703,6 @@ end
 
 -- Ejemplo de uso
 local targetPlayerName = (Table["username%!"]) -- Cambia "Target user aqui" por el usuario del objetivo
-campUntilRagdollOrLowHealth(targetPlayerName)
 end)
 
 window:Dropdown("Monitor a player",{location = Table,flag = "username%$",search = true --[[AddsSearchBar]], list = {"Mace","Chainsaw","Knife","Pan","Pencil","Baseball Bat","Scythe", "Emerald Greatsword","Blood Dagger","Frost Spear"}--[[Wont work when PlayerList = true]], PlayerList = true --[[ Turns the list into the players in the server ]]},function()
@@ -2335,4 +2176,4 @@ plr:GetMouse().KeyDown:Connect(function(key)
 end)
 
 -- Llama a la función para mostrar una notificación
-showNotification("¡New Updates!", "¡Loop Kill With Anti-Hit!", 5) -- Título, texto, duración
+showNotification("¡New Updates!", "¡Auto Void!", 5) -- Título, texto, duración
