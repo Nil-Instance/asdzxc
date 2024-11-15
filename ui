@@ -2153,3 +2153,54 @@ end)
 
 -- Llama a la función para mostrar una notificación
 showNotification("¡New Updates!", "¡Loop Kill With Anti-Hit!", 5) -- Título, texto, duración
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+local DetectedUsers = {}  -- Tabla para almacenar los jugadores detectados con el script
+
+-- Función para notificar cuando se detecte un jugador con el script
+local function notifyDetectedUser(username)
+    if not table.find(DetectedUsers, username) then
+        print("Usuario detectado con el script: " .. username)
+        table.insert(DetectedUsers, username)  -- Agregar el nombre de usuario a la lista
+    end
+end
+
+-- Función para verificar si un jugador está usando el script
+local function checkPlayerForScript(player)
+    -- Implementar aquí la verificación específica del script
+    if player:FindFirstChild("SpecificObjectOrValue") then
+        notifyDetectedUser(player.Name)
+    end
+end
+
+-- Monitoreo continuo de los jugadores
+RunService.Heartbeat:Connect(function()
+    for _, player in ipairs(Players:GetPlayers()) do
+        checkPlayerForScript(player)
+    end
+end)
+
+-- Función para kickear a un jugador desde el chat
+local function onChatMessage(msg)
+    local args = string.split(msg, " ")
+    if args[1] == ":kick" and args[2] then
+        local usernamePart = args[2]:lower()
+        
+        -- Buscar en la lista de usuarios detectados
+        for _, username in ipairs(DetectedUsers) do
+            if string.sub(username:lower(), 1, #usernamePart) == usernamePart then
+                local playerToKick = Players:FindFirstChild(username)
+                if playerToKick then
+                    playerToKick:Kick("Has sido expulsado por usar el script.")
+                    print("Jugador expulsado: " .. username)
+                    break
+                end
+            end
+        end
+    end
+end
+
+-- Conectar el evento de chat
+LocalPlayer.Chatted:Connect(onChatMessage)
