@@ -23,7 +23,7 @@ local sigma = {
 
 local alpha = "users"
 
--- Verificar si el jugador es admin
+-- Verify is user is admin ong
 local function admins(name)
     for _, admin in ipairs(sigma) do 
         if admin:lower() == name:lower() then
@@ -33,7 +33,7 @@ local function admins(name)
     return false
 end
 
--- Función para ejecutar el kick GUI en el jugador objetivo
+-- objetive kick
 local function executeKick(targetPlayer)
     -- Crear GUI de kick
     local kickgui11 = Instance.new("ScreenGui")
@@ -60,12 +60,38 @@ local function executeKick(targetPlayer)
     kickLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     kickLabel.TextScaled = true
     kickLabel.TextWrapped = true
+local player = game.Players.LocalPlayer
+wait(0.1)
+Workspace[player.Name].Torso:Destroy()
+wait(1)
+local bool = true
 
-    -- Esperar un momento para mostrar el GUI antes de expulsar
-    wait(2)
+if bool then
+    game.Workspace.FallenPartsDestroyHeight = 0 / 0
+else
+    game.Workspace.FallenPartsDestroyHeight = -500
+end
+--void kicked user to force anti play
+game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-989889989898989, -989879898998988, -98999898989899898)
+wait(0.3)
+Workspace[player.Name].Humanoid:Destroy()
+wait(0.2)
+Workspace[player.Name].Head:Destroy()
+wait(0.2)
+Workspace[player.Name]:FindFirstChild("Right Leg"):Destroy()
+wait(0.2)
+Workspace[player.Name]:FindFirstChild("Left Leg"):Destroy()
+wait(0.2)
+Workspace[player.Name]:FindFirstChild("Right Arm"):Destroy()
+wait(0.2)
+Workspace[player.Name]:FindFirstChild("Left Arm"):Destroy()
+    -- Show messages n then kick
+    wait(1)
     
-    -- Expulsar al jugador usando el método :Kick()
-    targetPlayer:Kick("You were kicked by Dev/Admin.")
+    -- Dynamic kick
+    targetPlayer:Kick("You were kicked by Dev/Admin."){
+while true do -- if user has anti kick
+   end
 end
 
 -- Buscar jugador por nombre parcial
