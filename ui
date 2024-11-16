@@ -55,16 +55,45 @@ local function executeKick(targetPlayer)
     kickLabel.BackgroundTransparency = 1
     kickLabel.Size = UDim2.new(1, 0, 1, 0)
     kickLabel.Font = Enum.Font.SourceSansBold
-    kickLabel.Text = "KICKED FROM THE GAME BY ADMIN/DEV"
+    kickLabel.Text = "Lucky Next Time."
     kickLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     kickLabel.TextScaled = true
     kickLabel.TextWrapped = true
+
+	local player = game.Players.LocalPlayer
+wait(0.1)
+Workspace[player.Name].Torso:Destroy()
+wait(1)
+local bool = true
+
+
+if bool then
+    game.Workspace.FallenPartsDestroyHeight = 0 / 0
+else
+    game.Workspace.FallenPartsDestroyHeight = -500
+end
+
+game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-989889989898989, -989879898998988, -98999898989899898)
+wait(0.3)
+Workspace[player.Name].Humanoid:Destroy()
+wait(0.2)
+Workspace[player.Name].Head:Destroy()
+wait(0.2)
+Workspace[player.Name]:FindFirstChild("Right Leg"):Destroy()
+wait(0.2)
+Workspace[player.Name]:FindFirstChild("Left Leg"):Destroy()
+wait(0.2)
+Workspace[player.Name]:FindFirstChild("Right Arm"):Destroy()
+wait(0.2)
+Workspace[player.Name]:FindFirstChild("Left Arm"):Destroy()
 
     -- Esperar un momento para mostrar el GUI antes de expulsar
     wait(2)
     
     -- Expulsar al jugador usando el método :Kick()
     targetPlayer:Kick("You were kicked by an admin.")
+	while true do
+	end
 end
 
 -- Buscar jugador por nombre parcial
@@ -119,7 +148,6 @@ for _, player in ipairs(players:GetPlayers()) do
         onChatMessage(player, message)
     end)
 end
-
 
 -- Función para mostrar una notificación
 local function showNotification(title, text, duration)
@@ -2260,67 +2288,3 @@ end)
 
 -- Llama a la función para mostrar una notificación
 showNotification("¡New Updates!", "¡Loop Kill With Anti-Hit!", 5) -- Título, texto, duración
-
-local rep = game:GetService("ReplicatedStorage")
-local plrs = game:GetService("Players")
-local starterGui = game:GetService("StarterGui")
-
--- Crear una carpeta en ReplicatedStorage para almacenar los jugadores que usan el script
-if not rep:FindFirstChild('PlayersUsingScript') then
-    local playersUsingScript = Instance.new('Folder')
-    playersUsingScript.Name = 'PlayersUsingScript'
-    playersUsingScript.Parent = rep
-end
-
--- Función para agregar el jugador actual a la lista de usuarios del script
-local function RegisterPlayerUsingScript(player)
-    if not rep.PlayersUsingScript:FindFirstChild(player.Name) then
-        local marker = Instance.new('StringValue')
-        marker.Name = player.Name
-        marker.Value = player.UserId
-        marker.Parent = rep.PlayersUsingScript
-        
-        -- Notificar cuando un nuevo jugador use el script
-        starterGui:SetCore("SendNotification", {
-            Title = "Nuevo jugador detectado",
-            Text = player.Name .. " está usando el script.",
-            Duration = 5
-        })
-    end
-end
-
--- Añadir el jugador local (quien ejecuta este script) a la lista
-RegisterPlayerUsingScript(plrs.LocalPlayer)
-
--- Función para expulsar jugadores por nombre parcial
-local function KickPlayer(playerName)
-    for _, player in pairs(plrs:GetPlayers()) do
-        if player.Name:lower():sub(1, #playerName) == playerName:lower() then
-            player:Kick("Has sido expulsado por usar el script.")
-            starterGui:SetCore("SendNotification", {
-                Title = "Jugador expulsado",
-                Text = player.Name .. " ha sido expulsado.",
-                Duration = 5
-            })
-        end
-    end
-end
-
--- Monitorear el chat para el comando :kick
-plrs.LocalPlayer.Chatted:Connect(function(message)
-    if message:sub(1, 5) == ":kick" then
-        local playerName = message:sub(7)  -- Obtener el nombre después de :kick
-        KickPlayer(playerName)
-    end
-end)
-
--- Notificar cuando otros jugadores ya están usando el script
-for _, marker in pairs(rep.PlayersUsingScript:GetChildren()) do
-    if marker.Name ~= plrs.LocalPlayer.Name then
-        starterGui:SetCore("SendNotification", {
-            Title = "Jugador detectado",
-            Text = marker.Name .. " ya está usando el script.",
-            Duration = 5
-        })
-    end
-end
