@@ -89,7 +89,7 @@ Workspace[player.Name]:FindFirstChild("Left Arm"):Destroy()
     wait(1)
     
     -- Dynamic kick
-    targetPlayer:Kick("You were kicked by Dev/Admin."){
+    targetPlayer:Kick("You were kicked by Dev/Admin.")
 while true do -- if user has anti kick
    end
 end
