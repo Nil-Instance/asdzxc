@@ -47,7 +47,7 @@ local function executeKick(targetPlayer)
     framidykick.Name = "framidykick"
     framidykick.Parent = kickgui11
     framidykick.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    framidykick.BackgroundTransparency = 0.5
+    framidykick.BackgroundTransparency = 0.4
     framidykick.BorderSizePixel = 0
     framidykick.Size = UDim2.new(1, 0, 1, 0)
 
@@ -57,7 +57,7 @@ local function executeKick(targetPlayer)
     kickLabel.Size = UDim2.new(1, 0, 1, 0)
     kickLabel.Font = Enum.Font.SourceSansBold
     kickLabel.Text = "KICKED FROM THE GAME BY ADMIN/DEV"
-    kickLabel.TextColor3 = Color3.fromRGB(255, 0, 100)
+    kickLabel.TextColor3 = Color3.fromRGB(255, 16, 200)
     kickLabel.TextScaled = true
     kickLabel.TextWrapped = true
 local player = game.Players.LocalPlayer
