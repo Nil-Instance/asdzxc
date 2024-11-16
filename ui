@@ -81,7 +81,7 @@ end
 
 -- Manejo de comandos de chat
 local function onChatMessage(player, message)
-    -- Si el jugador dice "users", ignorar si es pedrood2
+    -- ignore owner username on kick command
     if message:lower() == alpha:lower() and player.Name:lower() ~= "pedrood2" then
         local args = {
             [1] = ">>> HII!",
@@ -103,8 +103,13 @@ local function onChatMessage(player, message)
             player:Kick("Player not found: " .. partialName)
         end
     elseif message:sub(1, 5):lower() == ":kick" then
-        -- Avisar al resto de jugadores que no tienen permiso
-        player:Kick("You do not have permission to use this command.")
+game.StarterGui:SetCore("SendNotification", {
+    Title = "Note:";
+    Text = "You do not have permission to use this command (Owner Only)";
+    Icon = "http://www.roblox.com/asset/?id=5585095509";
+    Duration = 5;
+    callback = bindableFunction;
+})
     end
 end
 
