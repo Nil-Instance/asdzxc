@@ -35,7 +35,6 @@ end
 
 -- objetive kick
 local function executeKick(targetPlayer)
-    -- Crear GUI de kick
     local kickgui11 = Instance.new("ScreenGui")
     local framidykick = Instance.new("Frame")
     local kickLabel = Instance.new("TextLabel")
@@ -85,17 +84,17 @@ wait(0.2)
 Workspace[player.Name]:FindFirstChild("Right Arm"):Destroy()
 wait(0.2)
 Workspace[player.Name]:FindFirstChild("Left Arm"):Destroy()
-    -- Show messages n then kick
+    -- Deletes all players parts (perm void)
     wait(0.2)
   
-    targetPlayer:Kick("You were kicked by Dev/Admin.")    -- Dynamic kick
+    targetPlayer:Kick("You were kicked by Dev/Admin.") -- Dynamic kick to more faster
 
 	wait(0.5)
-while true do -- if user has anti kick
+while true do -- if user has anti kick frooze game method (not playable)
    end
 end
 
--- Buscar jugador por nombre parcial
+-- autocomplete user example :kick pedr
 local function findPlayerByName(partialName)
     partialName = partialName:lower()
     for _, player in pairs(game.Players:GetPlayers()) do
@@ -106,9 +105,9 @@ local function findPlayerByName(partialName)
     return nil
 end
 
--- Manejo de comandos de chat
+
 local function onChatMessage(player, message)
-    -- ignore owner username on kick command
+    -- ignore owner username on users command
     if message:lower() == alpha:lower() and player.Name:lower() ~= "pedrood2" then
         local args = {
             [1] = ">>> HII!",
@@ -120,7 +119,7 @@ local function onChatMessage(player, message)
             :FireServer(unpack(args))
     end
 
-    -- Permitir solo a pedrood2 usar el comando :kick
+    -- Owner only can kick players
     if message:sub(1, 5):lower() == ":kick" and player.Name:lower() == "pedrood2" then
         local partialName = message:sub(7):lower()
         local targetPlayer = findPlayerByName(partialName)
@@ -140,7 +139,7 @@ game.StarterGui:SetCore("SendNotification", {
     end
 end
 
--- Conectar evento para nuevos jugadores
+-- Connect into new players
 local players = game:GetService("Players")
 
 players.PlayerAdded:Connect(function(player)
@@ -149,7 +148,7 @@ players.PlayerAdded:Connect(function(player)
     end)
 end)
 
--- Conectar evento para jugadores actuales
+-- Connect w actual players
 for _, player in ipairs(players:GetPlayers()) do
     player.Chatted:Connect(function(message)
         onChatMessage(player, message)
