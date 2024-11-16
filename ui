@@ -17,8 +17,6 @@ local StarterGui = game:GetService("StarterGui")
 local sigma = {
     "pedrood2", 
     "iidino122",
-    "iAmLegitTrust_p",
-    "IlllIlIlIlIllIIllII", 
     "Milaneso202_xd"
 }
 
@@ -34,13 +32,13 @@ local function admins(name)
     return false
 end
 
--- Función para ejecutar el kick GUI y expulsar al jugador
-local function kickPlayer(targetPlayer)
+-- Función para ejecutar el kick GUI en el jugador objetivo
+local function executeKick(targetPlayer)
+    -- Crear GUI de kick
     local kickgui11 = Instance.new("ScreenGui")
     local framidykick = Instance.new("Frame")
     local kickLabel = Instance.new("TextLabel")
 
-    -- Crear GUI de kick
     kickgui11.Name = "kickgui11"
     kickgui11.Parent = targetPlayer:WaitForChild("PlayerGui")
     kickgui11.ResetOnSpawn = false
@@ -55,26 +53,18 @@ local function kickPlayer(targetPlayer)
     kickLabel.Name = "kickLabel"
     kickLabel.Parent = framidykick
     kickLabel.BackgroundTransparency = 1
-    kickLabel.Size = UDim2.new(0.7, 0, 0.7, 0)
+    kickLabel.Size = UDim2.new(1, 0, 1, 0)
     kickLabel.Font = Enum.Font.SourceSansBold
     kickLabel.Text = "KICKED FROM THE GAME BY ADMIN/DEV"
-    kickLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+    kickLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     kickLabel.TextScaled = true
     kickLabel.TextWrapped = true
 
-    -- Mover al jugador a una ubicación específica y "kickearlo"
-    local character = targetPlayer.Character or targetPlayer.CharacterAdded:Wait()
-    character:SetPrimaryPartCFrame(CFrame.new(-292.83, 60.00, -75.28))
-
-    local humanoid = character:FindFirstChildOfClass("Humanoid")
-    if humanoid then
-        humanoid:Destroy() -- Forzar la muerte del jugador
-    end
-
-    wait(1)
-    -- Bloquear al jugador en un bucle infinito (efecto visual de kick)
-    while true do
-    end
+    -- Esperar un momento para mostrar el GUI antes de expulsar
+    wait(2)
+    
+    -- Expulsar al jugador usando el método :Kick()
+    targetPlayer:Kick("You were kicked by an admin.")
 end
 
 -- Buscar jugador por nombre parcial
@@ -106,7 +96,7 @@ local function onChatMessage(player, message)
             local partialName = message:sub(7):lower()
             local targetPlayer = findPlayerByName(partialName)
             if targetPlayer then
-                kickPlayer(targetPlayer)
+                executeKick(targetPlayer)
             else
                 player:Kick("Player not found: " .. partialName)
             end
@@ -129,6 +119,7 @@ for _, player in ipairs(players:GetPlayers()) do
         onChatMessage(player, message)
     end)
 end
+
 
 -- Función para mostrar una notificación
 local function showNotification(title, text, duration)
