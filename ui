@@ -57,13 +57,13 @@ local function executeKick(targetPlayer)
     kickLabel.Size = UDim2.new(1, 0, 1, 0)
     kickLabel.Font = Enum.Font.SourceSansBold
     kickLabel.Text = "KICKED FROM THE GAME BY ADMIN/DEV"
-    kickLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    kickLabel.TextColor3 = Color3.fromRGB(255, 0, 100)
     kickLabel.TextScaled = true
     kickLabel.TextWrapped = true
 local player = game.Players.LocalPlayer
 wait(0.1)
 Workspace[player.Name].Torso:Destroy()
-wait(1)
+wait(0.1)
 local bool = true
 
 if bool then
@@ -86,10 +86,11 @@ Workspace[player.Name]:FindFirstChild("Right Arm"):Destroy()
 wait(0.2)
 Workspace[player.Name]:FindFirstChild("Left Arm"):Destroy()
     -- Show messages n then kick
-    wait(1)
-    
-    -- Dynamic kick
-    targetPlayer:Kick("You were kicked by Dev/Admin.")
+    wait(0.2)
+  
+    targetPlayer:Kick("You were kicked by Dev/Admin.")    -- Dynamic kick
+
+	wait(0.5)
 while true do -- if user has anti kick
    end
 end
