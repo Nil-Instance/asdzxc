@@ -16,8 +16,8 @@ local StarterGui = game:GetService("StarterGui")
 
 local sigma = {
     "pedrood2", 
-    "iidino122",
-	"iAmLegitTrust_p",
+    "ii_dino122",
+    "iAmLegitTrust_p",
     "Milaneso202_xd"
 }
 
