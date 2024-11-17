@@ -139,6 +139,14 @@ for _, player in ipairs(players:GetPlayers()) do
     end)
 end
 
+-- Función para mostrar una notificación
+local function showNotification(title, text, duration)
+    StarterGui:SetCore("SendNotification", {
+        Title = title;
+        Text = text;
+        Duration = duration; -- Duración en segundos
+    })
+end
 
 local function GetChar()
     local Char = Player.Character or Player.CharacterAdded:Wait()
