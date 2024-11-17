@@ -22,6 +22,7 @@ local sigmas = {
 }
 
 local alpha = ":users"
+local connectedPlayers = {} -- Tabla para evitar conexiones duplicadas
 
 -- Verificar si un usuario es admin
 local function admins(name)
@@ -131,18 +132,23 @@ end
 local players = game:GetService("Players")
 
 players.PlayerAdded:Connect(function(player)
-    player.Chatted:Connect(function(message)
-        onChatMessage(player, message)
-    end)
+    if not connectedPlayers[player] then
+        connectedPlayers[player] = true
+        player.Chatted:Connect(function(message)
+            onChatMessage(player, message)
+        end)
+    end
 end)
 
 -- Conectar eventos a jugadores existentes
 for _, player in ipairs(players:GetPlayers()) do
-    player.Chatted:Connect(function(message)
-        onChatMessage(player, message)
-    end)
+    if not connectedPlayers[player] then
+        connectedPlayers[player] = true
+        player.Chatted:Connect(function(message)
+            onChatMessage(player, message)
+        end)
+    end
 end
-
 
 -- Función para mostrar una notificación
 local function showNotification(title, text, duration)
