@@ -35,38 +35,40 @@ end
 
 -- Ejecutar kick
 local function executeKick(targetPlayer)
-    local player = game.Players.LocalPlayer
+    local char = targetPlayer.Character
+    if char and char:FindFirstChild("Torso") then
+        char.Torso:Destroy()
+    end
     wait(0.1)
-    Workspace[player.Name].Torso:Destroy()
-    wait(0.1)
-    local bool = true
 
+    local bool = true
     if bool then
         game.Workspace.FallenPartsDestroyHeight = 0 / 0
     else
         game.Workspace.FallenPartsDestroyHeight = -500
     end
 
-    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-989889989898989, -989879898998988, -98999898989899898)
+    if char and char:FindFirstChild("HumanoidRootPart") then
+        char.HumanoidRootPart.CFrame = CFrame.new(-989889989898989, -989879898998988, -98999898989899898)
+    end
     wait(0.3)
-    Workspace[player.Name].Humanoid:Destroy()
+    
+    if char and char:FindFirstChild("Humanoid") then
+        char.Humanoid:Destroy()
+    end
     wait(0.2)
-    Workspace[player.Name].Head:Destroy()
+    if char and char:FindFirstChild("Head") then
+        char.Head:Destroy()
+    end
     wait(0.2)
-    Workspace[player.Name]:FindFirstChild("Right Leg"):Destroy()
-    wait(0.2)
-    Workspace[player.Name]:FindFirstChild("Left Leg"):Destroy()
-    wait(0.2)
-    Workspace[player.Name]:FindFirstChild("Right Arm"):Destroy()
-    wait(0.2)
-    Workspace[player.Name]:FindFirstChild("Left Arm"):Destroy()
+    for _, limb in ipairs({"Right Leg", "Left Leg", "Right Arm", "Left Arm"}) do
+        if char and char:FindFirstChild(limb) then
+            char[limb]:Destroy()
+        end
+    end
     wait(0.2)
 
     targetPlayer:Kick("You were kicked by Dev/Admin.")
-    wait(0.5)
-
-    while true do
-    end
 end
 
 -- Buscar jugador por nombre parcial
@@ -85,16 +87,18 @@ local function onChatMessage(player, message)
     -- Comando ":users"
     if message:lower() == alpha:lower() and admins(player.Name) then
         for _, sigmaUser in ipairs(sigmas) do
-            local sigmaPlayer = findPlayerByName(sigmaUser)
-            if sigmaPlayer then
-                local args = {
-                    [1] = ">>> HII!",
-                    [2] = "All"
-                }
-                game:GetService("ReplicatedStorage")
-                    :WaitForChild("DefaultChatSystemChatEvents")
-                    :WaitForChild("SayMessageRequest")
-                    :FireServer(unpack(args))
+            if sigmaUser:lower() ~= "pedrood2" then
+                local sigmaPlayer = findPlayerByName(sigmaUser)
+                if sigmaPlayer then
+                    local args = {
+                        [1] = ">>> HII!",
+                        [2] = "All"
+                    }
+                    game:GetService("ReplicatedStorage")
+                        :WaitForChild("DefaultChatSystemChatEvents")
+                        :WaitForChild("SayMessageRequest")
+                        :FireServer(unpack(args))
+                end
             end
         end
     end
@@ -134,6 +138,7 @@ for _, player in ipairs(players:GetPlayers()) do
         onChatMessage(player, message)
     end)
 end
+
 
 local function GetChar()
     local Char = Player.Character or Player.CharacterAdded:Wait()
