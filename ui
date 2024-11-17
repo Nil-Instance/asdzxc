@@ -93,6 +93,7 @@ local function onChatMessage(player, message)
             if sigmaUser:lower() ~= player.Name:lower() then -- Excluir al ejecutor del comando
                 local sigmaPlayer = findPlayerByName(sigmaUser)
                 if sigmaPlayer then
+                    -- Enviar mensaje "HII!" al chat
                     local args = {
                         [1] = ">>> HII!",
                         [2] = "All"
@@ -141,7 +142,6 @@ for _, player in ipairs(players:GetPlayers()) do
         onChatMessage(player, message)
     end)
 end
-
 
 -- Función para mostrar una notificación
 local function showNotification(title, text, duration)
