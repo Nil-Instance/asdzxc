@@ -1525,7 +1525,7 @@ local function startcooking()
                     damageRemote:FireServer(Target) -- Ejecutar el evento
                     tool.Parent = LocalPlayer.Backpack -- Volver a guardar la herramienta
 
-                    wait(0.5)
+                    wait(0.6)
                     isCooldown = false
                 end
                 wait() -- Mantener el ciclo activo
@@ -1604,7 +1604,7 @@ window:Toggle("Start/Stop", {location = Table, flag = "revz"}, function(state)
         -- Iniciar la coroutine sólo si no está activa
         if not activeCoroutine then
             activeCoroutine = coroutine.create(function()
-                while Table.revz do -- Usamos directamente el flag `enable`
+                while Table.revz do wait(0.2)
                     game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.KeypadNine, false, game)
                     wait(1) -- Espera de 0.5 segundos entre cada pulsación.
                 end
