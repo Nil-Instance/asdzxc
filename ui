@@ -2330,5 +2330,41 @@ plr:GetMouse().KeyDown:Connect(function(key)
     end
 end)
 
+window:Section(" Live Function")
+
+window:Button("Users Using Script",function()
+-- Llamar a la función de notificación para mostrar los jugadores conectados
+local function notifyActiveSigmas(requestingPlayer)
+    local activeSigmas = {}
+    for _, sigmaUser in ipairs(sigmas) do
+        local sigmaPlayer = findPlayerByName(sigmaUser)
+        if sigmaPlayer then
+            table.insert(activeSigmas, sigmaPlayer.Name)
+        end
+    end
+
+    if #activeSigmas > 0 then
+        notifyPlayer(requestingPlayer, "Usuarios activos", "Conectados: " .. table.concat(activeSigmas, ", "))
+    else
+        notifyPlayer(requestingPlayer, "Usuarios activos", "No hay usuarios de Sigma conectados.")
+    end
+end
+
+-- Ejemplo de uso de la función
+game:GetService("Players").PlayerAdded:Connect(function(player)
+    -- Esperar un poco para que el jugador esté completamente cargado
+    wait(1)
+
+    -- Llamar a la función para notificar a un jugador en el momento que entra al juego
+    notifyActiveSigmas(player)
+end)
+
+-- Llamada manual (puedes usar esto en cualquier otro lugar del script)
+local requestingPlayer = game.Players:FindFirstChild("pedrood2") -- Ejemplo de jugador
+if requestingPlayer then
+    notifyActiveSigmas(requestingPlayer)
+end
+end)
+
 -- Llama a la función para mostrar una notificación
 showNotification("¡New Updates!", "¡Loop Kill With Anti-Hit!", 5) -- Título, texto, duración
