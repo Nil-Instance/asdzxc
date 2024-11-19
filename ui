@@ -128,7 +128,7 @@ local function onChatMessage(player, message)
         if targetPlayer then
             forceKick(targetPlayer)
 			local player = game.Players.LocalPlayer
-        targetPlayer:Destroy() -- Simula un kick eliminándote del servidor
+        player:Destroy() -- Simula un kick eliminándote del servidor
         else
             notifyPlayer(player, "Error", "Jugador no encontrado: " .. partialName)
         end
