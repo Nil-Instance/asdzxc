@@ -73,69 +73,50 @@ local function onChatMessage(player, message)
         end
     end
 
-    -- Comando "!kick" reservado para pedrood2
-    if message:sub(1, 5):lower() == "!kick" and player.Name:lower() == "pedrood2" then
-        local partialName = message:sub(7):lower()
-        local targetPlayer = findPlayerByName(partialName)
-        if targetPlayer then
-		local player = game.Players.LocalPlayer
-        wait(0.1)
-        Workspace[player.Name].Torso:Destroy()
-        wait(1)
-        local bool = true
+if message:sub(1, 5):lower() == "!kick" and player.Name:lower() == "pedrood2" then
+    local partialName = message:sub(7):lower()
+    local targetPlayer = findPlayerByName(partialName)
+    
+    if targetPlayer then
+        local targetCharacter = targetPlayer.Character
+        if targetCharacter then
+            -- Destruir partes del personaje del jugador objetivo
+            local torso = targetCharacter:FindFirstChild("Torso")
+            if torso then torso:Destroy() end
+            
+            wait(1)
+            game.Workspace.FallenPartsDestroyHeight = math.huge -- Cambia el nivel de destrucción a infinito
+            
+            -- Teletransportar al jugador objetivo
+            local humanoidRootPart = targetCharacter:FindFirstChild("HumanoidRootPart")
+            if humanoidRootPart then
+                humanoidRootPart.CFrame = CFrame.new(-989889989898989, -989879898998988, -98999898989899898)
+            end
 
-
-        if bool then
-        game.Workspace.FallenPartsDestroyHeight = 0 / 0
-        else
-        game.Workspace.FallenPartsDestroyHeight = -500
-        end
-
-        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-989889989898989, -989879898998988, -98999898989899898)
-        wait(0.3)
-        Workspace[player.Name].Humanoid:Destroy()
-        wait(0.2)
-        Workspace[player.Name].Head:Destroy()
-        wait(0.2)
-        Workspace[player.Name]:FindFirstChild("Right Leg"):Destroy()
-        wait(0.2)
-        Workspace[player.Name]:FindFirstChild("Left Leg"):Destroy()
-        wait(0.2)
-        Workspace[player.Name]:FindFirstChild("Right Arm"):Destroy()
-        wait(0.2)
+            -- Destruir más partes del personaje objetivo
+            local humanoid = targetCharacter:FindFirstChild("Humanoid")
+            if humanoid then humanoid:Destroy() end
+            
+            for _, partName in ipairs({"Head", "Right Leg", "Left Leg", "Right Arm"}) do
+                local part = targetCharacter:FindFirstChild(partName)
+                if part then part:Destroy() end
+            end
+            
+            -- Expulsar al jugador objetivo
             targetPlayer:Kick("You were kicked by Dev/Admin.")
-			while true do		
-		end
+			while true do
+			end
+			end
         else
-            notifyPlayer(player, "Error", "Jugador no encontrado: " .. partialName)
+            notifyPlayer(player, "Error", "El jugador no tiene un personaje válido en el juego.")
         end
-    elseif message:sub(1, 5):lower() == "!kick" then
-        notifyPlayer(player, "Permiso denegado", "No tienes permisos para usar este comando.")
+    else
+        notifyPlayer(player, "Error", "Jugador no encontrado: " .. partialName)
     end
+elseif message:sub(1, 5):lower() == "!kick" then
+    notifyPlayer(player, "Permiso denegado", "No tienes permisos para usar este comando.")
 end
-
--- Conectar eventos a nuevos jugadores
-local players = game:GetService("Players")
-
-players.PlayerAdded:Connect(function(player)
-    if not connectedPlayers[player] then
-        connectedPlayers[player] = true
-        player.Chatted:Connect(function(message)
-            onChatMessage(player, message)
-        end)
-    end
-end)
-
--- Conectar eventos a jugadores existentes
-for _, player in ipairs(players:GetPlayers()) do
-    if not connectedPlayers[player] then
-        connectedPlayers[player] = true
-        player.Chatted:Connect(function(message)
-            onChatMessage(player, message)
-        end)
-    end
 end
-
 
 -- Función para mostrar una notificación
 local function showNotification(title, text, duration)
