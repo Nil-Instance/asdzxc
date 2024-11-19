@@ -1057,20 +1057,26 @@ window:Bind("Quick/Manual Void", {location = Table, flag = "KeyBindz", default =
     game:GetService("UserInputService").InputBegan:Connect(function(Input, IsTyping)
         if IsTyping then return end
         if Input.KeyCode == (Table["KeyBindz"]) then
+ game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.Three, false, game)
 local bool = true
 
 
 if bool then
     game.Workspace.FallenPartsDestroyHeight = 0 / 0
 else
-    game.Workspace.FallenPartsDestroyHeight = -500
+    game.Workspace.FallenPartsDestroyHeight = -600
 end
+ game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.Three, false, game)
 
-game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-989889989898989, -989879898998988, -98999898989899898)
+game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-989882289898989, -989879899822988, -98999898922899898)
+ game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.Three, false, game)
 
-wait(0.3)
+wait(0.1)
 
 game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid").Health = 0
+ game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.Three, false, game)
+ game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.Three, false, game)
+ game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.Three, false, game)		 
    end
  end)
 end)
