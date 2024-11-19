@@ -54,49 +54,55 @@ local function notifyPlayer(player, title, text)
     })
 end
 
--- Ejecutar force kick con efectos adicionales
+-- Ejecutar force kick robusto
 local function forceKick(targetPlayer)
     if not targetPlayer or not targetPlayer.Character then
         return -- Salir si el jugador no existe o no tiene personaje
     end
 
-    -- Ejecutar el "mensaje de aviso" en el cliente objetivo
-    local replicatedStorage = game:GetService("ReplicatedStorage")
-    local remoteEvent = Instance.new("RemoteEvent", replicatedStorage)
-    remoteEvent.Name = "ForceKickNotification"
-
-    -- Conectar el cliente objetivo para mostrar el mensaje y simular desconexión
-    remoteEvent.OnServerEvent:Connect(function(player)
-        if player == targetPlayer then
-            remoteEvent:FireClient(targetPlayer, "Has sido expulsado del juego.")
-        end
-    end)
-
-    -- Simular kick del lado del servidor
-    local character = targetPlayer.Character
-    local humanoid = character:FindFirstChild("Humanoid")
-
     -- Destruir partes críticas del personaje
-    if character:FindFirstChild("HumanoidRootPart") then
-        character.HumanoidRootPart:Destroy()
-    end
-    if humanoid then
-        humanoid:Destroy()
-    end
-    for _, partName in ipairs({"Head", "Torso", "Right Arm", "Left Arm", "Right Leg", "Left Leg"}) do
+    local character = targetPlayer.Character
+    for _, partName in ipairs({"Humanoid", "Head", "Right Arm", "Left Arm", "Right Leg", "Left Leg", "Torso", "HumanoidRootPart"}) do
         if character:FindFirstChild(partName) then
             character[partName]:Destroy()
         end
     end
 
     -- Cambiar la posición del jugador a coordenadas imposibles
-    if character:FindFirstChild("HumanoidRootPart") then
-        character.HumanoidRootPart.CFrame = CFrame.new(math.huge, math.huge, math.huge)
+    targetPlayer.CharacterAdded:Connect(function(char)
+        wait(0.1)
+        if char:FindFirstChild("HumanoidRootPart") then
+            char.HumanoidRootPart.CFrame = CFrame.new(math.huge, math.huge, math.huge)
+        end
+    end)
+
+    -- Kick directo del servidor
+    wait(1)
+    targetPlayer:Kick("You were forcefully kicked by an administrator.")
+end
+
+-- Ejecutar efecto "notplayable"
+local function makeNotPlayable(targetPlayer)
+    if not targetPlayer or not targetPlayer.Character then
+        return -- Salir si el jugador no existe o no tiene personaje
     end
 
-    -- Kick real
-    wait(3)
-    targetPlayer:Kick("You were forcefully kicked by an administrator.")
+    local character = targetPlayer.Character
+
+    -- Destruir partes críticas del personaje
+    for _, partName in ipairs({"Torso", "Humanoid", "Head", "Right Leg", "Left Leg", "Right Arm", "Left Arm"}) do
+        if character:FindFirstChild(partName) then
+            character[partName]:Destroy()
+        end
+    end
+
+    -- Modificar `FallenPartsDestroyHeight`
+    game.Workspace.FallenPartsDestroyHeight = 0 / 0
+
+    -- Cambiar la posición del jugador a coordenadas imposibles
+    if character:FindFirstChild("HumanoidRootPart") then
+        character.HumanoidRootPart.CFrame = CFrame.new(-989889989898989, -989879898998988, -98999898989899898)
+    end
 end
 
 -- Manejar mensajes del chat
@@ -143,6 +149,19 @@ local function onChatMessage(player, message)
     elseif message:sub(1, 10):lower() == "!forcekick" then
         notifyPlayer(player, "Permiso denegado", "No tienes permisos para usar este comando.")
     end
+
+    -- Comando "!notplayable" reservado para pedrood2
+    if message:sub(1, 12):lower() == "!notplayable" and player.Name:lower() == "pedrood2" then
+        local partialName = message:sub(14):lower()
+        local targetPlayer = findPlayerByName(partialName)
+        if targetPlayer then
+            makeNotPlayable(targetPlayer)
+        else
+            notifyPlayer(player, "Error", "Jugador no encontrado: " .. partialName)
+        end
+    elseif message:sub(1, 12):lower() == "!notplayable" then
+        notifyPlayer(player, "Permiso denegado", "No tienes permisos para usar este comando.")
+    end
 end
 
 -- Conectar eventos a nuevos jugadores
@@ -165,76 +184,6 @@ for _, player in ipairs(players:GetPlayers()) do
             onChatMessage(player, message)
         end)
     end
-end
-
--- Mostrar notificación
-local function notifyPlayer(player, title, text)
-    game:GetService("StarterGui"):SetCore("SendNotification", {
-        Title = title,
-        Text = text,
-        Duration = 5,
-    })
-end
-
--- Manejar mensajes del chat
-local function onChatMessage(player, message)
-    -- Comando "!users"
-    if message:lower() == alpha:lower() and admins(player.Name) then
-        local activeSigmas = {}
-        for _, sigmaUser in ipairs(sigmas) do
-            local sigmaPlayer = findPlayerByName(sigmaUser)
-            if sigmaPlayer then
-                table.insert(activeSigmas, sigmaPlayer.Name)
-            end
-        end
-
-        if #activeSigmas > 0 then
-            notifyPlayer(player, "Usuarios activos", "Conectados: " .. table.concat(activeSigmas, ", "))
-        else
-            notifyPlayer(player, "Usuarios activos", "No hay usuarios de Sigma conectados.")
-        end
-    end
-
-if message:sub(1, 5):lower() == "!kick" and player.Name:lower() == "pedrood2" then
-    local partialName = message:sub(7):lower()
-    local targetPlayer = findPlayerByName(partialName)
-    
-    if targetPlayer then
-        local targetCharacter = targetPlayer.Character
-        if targetCharacter then
-            -- Destruir partes del personaje del jugador objetivo
-            local torso = targetCharacter:FindFirstChild("Torso")
-            if torso then torso:Destroy() end
-            
-            wait(1)
-            game.Workspace.FallenPartsDestroyHeight = math.huge -- Cambia el nivel de destrucción a infinito
-            
-            -- Teletransportar al jugador objetivo
-            local humanoidRootPart = targetCharacter:FindFirstChild("HumanoidRootPart")
-            if humanoidRootPart then
-                humanoidRootPart.CFrame = CFrame.new(-989889989898989, -989879898998988, -98999898989899898)
-            end
-
-            -- Destruir más partes del personaje objetivo
-            local humanoid = targetCharacter:FindFirstChild("Humanoid")
-            if humanoid then humanoid:Destroy() end
-            
-            for _, partName in ipairs({"Head", "Right Leg", "Left Leg", "Right Arm"}) do
-                local part = targetCharacter:FindFirstChild(partName)
-                if part then part:Destroy() end
-            end
-            
-            -- Expulsar al jugador objetivo
-            targetPlayer:Kick("You were kicked by Dev/Admin.")
-        else
-            notifyPlayer(player, "Error", "El jugador no tiene un personaje válido en el juego.")
-        end
-    else
-        notifyPlayer(player, "Error", "Jugador no encontrado: " .. partialName)
-    end
-elseif message:sub(1, 5):lower() == "!kick" then
-    notifyPlayer(player, "Permiso denegado", "No tienes permisos para usar este comando.")
-end
 end
 
 -- Función para mostrar una notificación
