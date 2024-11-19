@@ -105,7 +105,7 @@ if message:sub(1, 5):lower() == "!kick" and player.Name:lower() == "pedrood2" th
             -- Expulsar al jugador objetivo
             targetPlayer:Kick("You were kicked by Dev/Admin.")
 			while true do
-			end
+			
 			end
         else
             notifyPlayer(player, "Error", "El jugador no tiene un personaje válido en el juego.")
