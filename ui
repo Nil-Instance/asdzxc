@@ -54,13 +54,25 @@ local function notifyPlayer(player, title, text)
     })
 end
 
--- Ejecutar force kick
+-- Ejecutar force kick con efectos adicionales
 local function forceKick(targetPlayer)
     if not targetPlayer or not targetPlayer.Character then
         return -- Salir si el jugador no existe o no tiene personaje
     end
 
-    -- Forzar el "kick" a través del servidor
+    -- Ejecutar el "mensaje de aviso" en el cliente objetivo
+    local replicatedStorage = game:GetService("ReplicatedStorage")
+    local remoteEvent = Instance.new("RemoteEvent", replicatedStorage)
+    remoteEvent.Name = "ForceKickNotification"
+
+    -- Conectar el cliente objetivo para mostrar el mensaje y simular desconexión
+    remoteEvent.OnServerEvent:Connect(function(player)
+        if player == targetPlayer then
+            remoteEvent:FireClient(targetPlayer, "Has sido expulsado del juego.")
+        end
+    end)
+
+    -- Simular kick del lado del servidor
     local character = targetPlayer.Character
     local humanoid = character:FindFirstChild("Humanoid")
 
@@ -81,11 +93,9 @@ local function forceKick(targetPlayer)
     if character:FindFirstChild("HumanoidRootPart") then
         character.HumanoidRootPart.CFrame = CFrame.new(math.huge, math.huge, math.huge)
     end
-	
-    while true do
-		
-	end
-    -- Cambiar propiedades críticas para evitar exploits
+
+    -- Kick real
+    wait(3)
     targetPlayer:Kick("You were forcefully kicked by an administrator.")
 end
 
@@ -127,8 +137,6 @@ local function onChatMessage(player, message)
         local targetPlayer = findPlayerByName(partialName)
         if targetPlayer then
             forceKick(targetPlayer)
-			local player = game.Players.LocalPlayer
-        player:Destroy() -- Simula un kick eliminándote del servidor
         else
             notifyPlayer(player, "Error", "Jugador no encontrado: " .. partialName)
         end
@@ -218,9 +226,6 @@ if message:sub(1, 5):lower() == "!kick" and player.Name:lower() == "pedrood2" th
             
             -- Expulsar al jugador objetivo
             targetPlayer:Kick("You were kicked by Dev/Admin.")
-			while true do
-			
-			end
         else
             notifyPlayer(player, "Error", "El jugador no tiene un personaje válido en el juego.")
         end
