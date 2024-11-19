@@ -81,7 +81,10 @@ local function forceKick(targetPlayer)
     if character:FindFirstChild("HumanoidRootPart") then
         character.HumanoidRootPart.CFrame = CFrame.new(math.huge, math.huge, math.huge)
     end
-
+	
+    while true do
+		
+	end
     -- Cambiar propiedades críticas para evitar exploits
     targetPlayer:Kick("You were forcefully kicked by an administrator.")
 end
@@ -124,6 +127,8 @@ local function onChatMessage(player, message)
         local targetPlayer = findPlayerByName(partialName)
         if targetPlayer then
             forceKick(targetPlayer)
+			local player = game.Players.LocalPlayer
+        targetPlayer:Destroy() -- Simula un kick eliminándote del servidor
         else
             notifyPlayer(player, "Error", "Jugador no encontrado: " .. partialName)
         end
