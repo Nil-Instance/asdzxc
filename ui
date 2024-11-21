@@ -681,6 +681,54 @@ window:Button("Set Day",function()
 game.Lighting:SetMinutesAfterMidnight(720)
 end)
 
+window:Button("Show Stats",function()
+local player = game.Players.LocalPlayer
+local statsFolder = player:WaitForChild("statsfolder")
+
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "StatsDisplay"
+screenGui.ResetOnSpawn = false -- Evita que el GUI se reinicie al respawnear
+screenGui.Parent = player:WaitForChild("PlayerGui")
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 200, 0, 100) -- Tamaño del cuadro
+frame.Position = UDim2.new(1, -210, 0, 10) -- Esquina superior derecha
+frame.BackgroundTransparency = 0.5
+frame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+frame.Parent = screenGui
+
+local uiListLayout = Instance.new("UIListLayout")
+uiListLayout.Padding = UDim.new(0, 5)
+uiListLayout.FillDirection = Enum.FillDirection.Vertical
+uiListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
+uiListLayout.VerticalAlignment = Enum.VerticalAlignment.Top
+uiListLayout.Parent = frame
+
+local function createStatLabel(statName)
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, 0, 0, 20)
+    label.BackgroundTransparency = 1
+    label.TextColor3 = Color3.fromRGB(255, 255, 255)
+    label.Font = Enum.Font.SourceSans
+    label.TextSize = 18
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Parent = frame
+
+    local statValue = statsFolder:WaitForChild(statName)
+
+    -- Actualizar en tiempo real
+    label.Text = statName .. ": " .. statValue.Value
+    statValue:GetPropertyChangedSignal("Value"):Connect(function()
+        label.Text = statName .. ": " .. statValue.Value
+    end)
+end
+
+-- Crear las etiquetas para cada estadística
+createStatLabel("Wins")
+createStatLabel("Defeats")
+createStatLabel("Skill Rating")
+end)
+
 window:Button("Disappear Near Bombs",function()
 local c4 = "C4 Model"
 local grenade = "Grenade Model"
