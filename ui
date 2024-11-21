@@ -682,8 +682,10 @@ game.Lighting:SetMinutesAfterMidnight(720)
 end)
 
 window:Button("Show Stats",function()
+-- Crear el GUI
 local player = game.Players.LocalPlayer
 local statsFolder = player:WaitForChild("statsfolder")
+local leaderstats = player:WaitForChild("leaderstats") -- Nuevo folder para "Rank"
 
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "StatsDisplay"
@@ -691,30 +693,36 @@ screenGui.ResetOnSpawn = false -- Evita que el GUI se reinicie al respawnear
 screenGui.Parent = player:WaitForChild("PlayerGui")
 
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 200, 0, 100) -- Tamaño del cuadro
-frame.Position = UDim2.new(1, -210, 0, 10) -- Esquina superior derecha
-frame.BackgroundTransparency = 0.5
-frame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+frame.Size = UDim2.new(0, 250, 0, 0) -- Ancho fijo, altura ajustable
+frame.Position = UDim2.new(1, -240, 0, -11) -- Más arriba y hacia la derecha
+frame.BackgroundTransparency = 0.6 -- Más transparencia
+frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- Fondo negro
+frame.BorderColor3 = Color3.fromRGB(255, 80, 190) -- Borde azul
 frame.Parent = screenGui
 
 local uiListLayout = Instance.new("UIListLayout")
-uiListLayout.Padding = UDim.new(0, 5)
+uiListLayout.Padding = UDim.new(0, 4.7) -- Espaciado entre los elementos
 uiListLayout.FillDirection = Enum.FillDirection.Vertical
 uiListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
 uiListLayout.VerticalAlignment = Enum.VerticalAlignment.Top
 uiListLayout.Parent = frame
 
-local function createStatLabel(statName)
+-- Ajustar automáticamente la altura del frame según el contenido
+uiListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+    frame.Size = UDim2.new(0, 250, 0, uiListLayout.AbsoluteContentSize.Y + 10)
+end)
+
+local function createStatLabel(statName, parentFolder, valueType)
     local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(1, 0, 0, 20)
+    label.Size = UDim2.new(0.8, 0, 0, 15) -- Ajustar al contenido
     label.BackgroundTransparency = 1
     label.TextColor3 = Color3.fromRGB(255, 255, 255)
-    label.Font = Enum.Font.SourceSans
-    label.TextSize = 18
+    label.Font = Enum.Font.Roboto
+    label.TextSize = 16
     label.TextXAlignment = Enum.TextXAlignment.Left
     label.Parent = frame
 
-    local statValue = statsFolder:WaitForChild(statName)
+    local statValue = parentFolder:WaitForChild(statName)
 
     -- Actualizar en tiempo real
     label.Text = statName .. ": " .. statValue.Value
@@ -724,9 +732,10 @@ local function createStatLabel(statName)
 end
 
 -- Crear las etiquetas para cada estadística
-createStatLabel("Wins")
-createStatLabel("Defeats")
-createStatLabel("Skill Rating")
+createStatLabel("Wins", statsFolder, "IntValue")
+createStatLabel("Defeats", statsFolder, "IntValue")
+createStatLabel("Skill Rating", statsFolder, "NumberValue")
+createStatLabel("Rank", leaderstats, "StringValue") -- Nueva estadística "Rank"
 end)
 
 window:Button("Disappear Near Bombs",function()
