@@ -1250,7 +1250,7 @@ window:Section(" Target List")
 
 wait(.1)
 
-window:Dropdown("Select Target",{location = Table,flag = "player1",search = true --[[AddsSearchBar]], list = {"Mace","Chainsaw","Knife","Pan","Pencil","Baseball Bat","Scythe","Emerald Greatsword","Blood Dagger"} --[[Wont work when PlayerList = true]], PlayerList = true --[[ Turns the list into the players in the server ]]},function()game.StarterGui:SetCore("SendNotification", {
+window:Dropdown("Kill aura to",{location = Table,flag = "player1",search = true --[[AddsSearchBar]], list = {"Mace","Chainsaw","Knife","Pan","Pencil","Baseball Bat","Scythe","Emerald Greatsword","Blood Dagger"} --[[Wont work when PlayerList = true]], PlayerList = true --[[ Turns the list into the players in the server ]]},function()game.StarterGui:SetCore("SendNotification", {
     Title = "Target:";
     Text = "Choosed sucessfully!";
     Icon = "http://www.roblox.com/asset/?id=5585103223";
@@ -1282,7 +1282,7 @@ end)
 
 wait(.1)
 
-window:Dropdown("Target Selection",{location = Table,flag = "player2",search = true --[[AddsSearchBar]], list = {"Mace","Chainsaw","Knife","Pan","Pencil","Baseball Bat","Scythe","Emerald Greatsword","Blood Dagger"} --[[Wont work when PlayerList = true]], PlayerList = true --[[ Turns the list into the players in the server ]]},function()game.StarterGui:SetCore("SendNotification", {
+window:Dropdown("Kill aura to",{location = Table,flag = "player2",search = true --[[AddsSearchBar]], list = {"Mace","Chainsaw","Knife","Pan","Pencil","Baseball Bat","Scythe","Emerald Greatsword","Blood Dagger"} --[[Wont work when PlayerList = true]], PlayerList = true --[[ Turns the list into the players in the server ]]},function()game.StarterGui:SetCore("SendNotification", {
     Title = "Target:";
     Text = "Choosed sucessfully!";
     Icon = "http://www.roblox.com/asset/?id=5585103223";
@@ -1312,103 +1312,6 @@ UserInputService.InputBegan:Connect(function(Input, IsTyping)
 end)
 end)
 
-wait(.1)
-
-window:Dropdown("Select Target",{location = Table,flag = "player3",search = true --[[AddsSearchBar]], list = {"Mace","Chainsaw","Knife","Pan","Pencil","Baseball Bat","Scythe","Emerald Greatsword","Blood Dagger"} --[[Wont work when PlayerList = true]], PlayerList = true --[[ Turns the list into the players in the server ]]},function()game.StarterGui:SetCore("SendNotification", {
-    Title = "Target:";
-    Text = "Choosed sucessfully!";
-    Icon = "http://www.roblox.com/asset/?id=5585103223";
-    Duration = 5;
-    callback = bindableFunction;
-})
-local usernames        = {(Table["player3"])}-- Reemplaza estos nombres de usuario con los que desees
-local Players          = game:GetService("Players")
-local LocalPlayer      = Players.LocalPlayer
-local Mouse            = LocalPlayer:GetMouse()
-local UserInputService = game:GetService("UserInputService")
-
-UserInputService.InputBegan:Connect(function(Input, IsTyping)
-    if IsTyping then return end
-    if Input.KeyCode == Enum.KeyCode.KeypadMinus then
-        for _, username in pairs(usernames) do
-            local TargetPlayer = Players:FindFirstChild(username)
-            if TargetPlayer and TargetPlayer.Character and TargetPlayer.Character:FindFirstChild("Humanoid") then
-                local Target = TargetPlayer.Character:FindFirstChild("Humanoid")
-                repeat
-                    wait()
-                    LocalPlayer.Character:FindFirstChildOfClass("Tool").DamageRemote:FireServer(Target)
-                until Target.Health <= 0
-            end
-        end
-    end
-end)
-end)
-
-wait(.1)
-
-window:Dropdown("Select Target",{location = Table,flag = "player4",search = true --[[AddsSearchBar]], list = {"Mace","Chainsaw","Knife","Pan","Pencil","Baseball Bat","Scythe","Emerald Greatsword","Blood Dagger"} --[[Wont work when PlayerList = true]], PlayerList = true --[[ Turns the list into the players in the server ]]},function()game.StarterGui:SetCore("SendNotification", {
-    Title = "Target:";
-    Text = "Choosed sucessfully!";
-    Icon = "http://www.roblox.com/asset/?id=5585103223";
-    Duration = 5;
-    callback = bindableFunction;
-})
-local usernames        = {(Table["player4"])}-- Reemplaza estos nombres de usuario con los que desees
-local Players          = game:GetService("Players")
-local LocalPlayer      = Players.LocalPlayer
-local Mouse            = LocalPlayer:GetMouse()
-local UserInputService = game:GetService("UserInputService")
-
-UserInputService.InputBegan:Connect(function(Input, IsTyping)
-    if IsTyping then return end
-    if Input.KeyCode == Enum.KeyCode.KeypadMinus then
-        for _, username in pairs(usernames) do
-            local TargetPlayer = Players:FindFirstChild(username)
-            if TargetPlayer and TargetPlayer.Character and TargetPlayer.Character:FindFirstChild("Humanoid") then
-                local Target = TargetPlayer.Character:FindFirstChild("Humanoid")
-                repeat
-                    wait()
-                    LocalPlayer.Character:FindFirstChildOfClass("Tool").DamageRemote:FireServer(Target)
-                until Target.Health <= 0
-            end
-        end
-    end
-end)
-end)
-
-wait(.1)
-
-window:Dropdown("Select Target",{location = Table,flag = "player5",search = true --[[AddsSearchBar]], list = {"Mace","Chainsaw","Knife","Pan","Pencil","Baseball Bat","Scythe","Emerald Greatsword","Blood Dagger"} --[[Wont work when PlayerList = true]], PlayerList = true --[[ Turns the list into the players in the server ]]},function()game.StarterGui:SetCore("SendNotification", {
-    Title = "Target:";
-    Text = "Choosed sucessfully!";
-    Icon = "http://www.roblox.com/asset/?id=5585103223";
-    Duration = 5;
-    callback = bindableFunction;
-})
-local usernames        = {(Table["player5"])}-- Reemplaza estos nombres de usuario con los que desees
-local Players          = game:GetService("Players")
-local LocalPlayer      = Players.LocalPlayer
-local Mouse            = LocalPlayer:GetMouse()
-local UserInputService = game:GetService("UserInputService")
-
-UserInputService.InputBegan:Connect(function(Input, IsTyping)
-    if IsTyping then return end
-    if Input.KeyCode == Enum.KeyCode.KeypadMinus then
-        for _, username in pairs(usernames) do
-            local TargetPlayer = Players:FindFirstChild(username)
-            if TargetPlayer and TargetPlayer.Character and TargetPlayer.Character:FindFirstChild("Humanoid") then
-                local Target = TargetPlayer.Character:FindFirstChild("Humanoid")
-                repeat
-                    wait()
-                    LocalPlayer.Character:FindFirstChildOfClass("Tool").DamageRemote:FireServer(Target)
-                until Target.Health <= 0
-            end
-        end
-    end
-end)
-end)
-
-
 if not _G.IgnoreList then
     _G.IgnoreList = {}
 end
@@ -1421,92 +1324,115 @@ local function GetChar()
     return Player.Character or Player.CharacterAdded:Wait()
 end
 
-window:Toggle("Start/Stop Loop (Fixed)", {location = Table, flag = "enable"}, function(state)
-    KillingNear = state  -- Cambiar el estado de Kill Aura al valor del toggle
+window:Toggle("Start Kill Aura on them", {location = Table, flag = "enable"}, function(state)
+    local isCooldown = false -- Control de enfriamiento
+    local allowedUsers = {Table["player1"], Table["player2"]} -- Lista de usuarios permitidos
+    local minRange = 500 -- Rango de ataque en studs
+    local attackThread -- Hilo de ataque (corrutina)
 
-    if KillingNear then
-        coroutine.wrap(function()  -- Usar coroutine para ejecutar el Kill Aura en paralelo
-            while KillingNear do
-                -- Kill Aura empieza aquí
-                local target
-                local minRange = 500  -- Rango de activación del Kill Aura en studs
-                local allowedUsers = {Table["player1"], Table["player2"], Table["player3"], Table["player4"], Table["player5"]}
+    -- Función para buscar un jugador permitido más cercano
+    local function findNearestTarget()
+        local LocalPlayer = game.Players.LocalPlayer
+        local playerChar = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+        local playerRoot = playerChar:FindFirstChild("HumanoidRootPart")
 
-                local playerChar = GetChar()
-                local playerRoot = playerChar:FindFirstChild("HumanoidRootPart")
+        if not playerRoot then return nil end
 
-                if playerRoot then
-                    for _, v in pairs(workspace:GetChildren()) do
-                        if v ~= playerChar and table.find(allowedUsers, v.Name) then
-                            local vhum = v:FindFirstChild("Humanoid")
-                            local vroot = v:FindFirstChild("HumanoidRootPart")
-                            if vhum and vroot then
-                                local distance = (vroot.Position - playerRoot.Position).magnitude
-                                if vhum.Health > 0 and not v:FindFirstChild("ForceField") and distance <= minRange then
-                                    target = vhum
-                                    minRange = distance
-                                end
-                            end
-                        end
-                    end
+        local nearestTarget = nil
+        local shortestDistance = minRange
 
-                    -- Si hay un objetivo válido, atacar
-                    if target then
-                        local tool = playerChar:FindFirstChildOfClass("Tool")
-                        if tool and tool:FindFirstChild("DamageRemote") then
-                            tool.DamageRemote:FireServer(target)
-                        end
+        for _, potentialTarget in pairs(workspace:GetChildren()) do
+            if table.find(allowedUsers, potentialTarget.Name) and potentialTarget ~= playerChar then -- Ignorar al jugador local
+                local targetHumanoid = potentialTarget:FindFirstChild("Humanoid")
+                local targetRoot = potentialTarget:FindFirstChild("HumanoidRootPart")
+
+                if targetHumanoid and targetRoot and targetHumanoid.Health > 0 and not potentialTarget:FindFirstChild("ForceField") then
+                    local distance = (targetRoot.Position - playerRoot.Position).Magnitude
+                    if distance <= shortestDistance then
+                        nearestTarget = targetHumanoid
+                        shortestDistance = distance
                     end
                 end
-
-                -- Espera un breve momento antes de volver a ejecutar el loop
-                wait(0.1)  -- Retraso para evitar sobrecarga del servidor
             end
-        end)()
+        end
+
+        return nearestTarget
     end
-end)
 
-window:Toggle("Auto Select Dagger",{location = Table, flag = "enable"},function()
-local stopFlag = false
-game.StarterGui:SetCore("SendNotification", {
-    Title = "Current:";
-    Text = "Enabled!",
-    Icon = "http://www.roblox.com/asset/?id=5585095509"; 
-    Duration = 5; 
-    callback = bindableFunction;
-})
-local function pressKey()
-local player = game.Players.LocalPlayer
-local backpack = player.Backpack
-local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
-local equipDelay = 0.2 -- Tiempo en segundos entre cada equipamiento
+    -- Función para buscar cualquier herramienta con DamageRemote que **NO** sea "Kawaii Revolver"
+    local function findToolWithDamageRemote()
+        local LocalPlayer = game.Players.LocalPlayer
+        local tools = {}
 
-for _, tool in ipairs(backpack:GetChildren()) do
-    if tool:IsA("Tool") and tool.Name == "Holloween Dagger" then
-        humanoid:EquipTool(tool)  -- Equipar una sola herramienta
-        wait(equipDelay) -- Esperar antes de equipar la siguiente
+        -- Revisar herramientas en el Backpack
+        for _, tool in pairs(LocalPlayer.Backpack:GetChildren()) do
+            if tool.Name ~= "Kawaii Revolver" and tool:FindFirstChild("DamageRemote") then
+                table.insert(tools, tool)
+            end
+        end
+
+        -- Revisar herramienta equipada en el personaje
+        local equippedTool = LocalPlayer.Character:FindFirstChildOfClass("Tool")
+        if equippedTool and equippedTool.Name ~= "Kawaii Revolver" and equippedTool:FindFirstChild("DamageRemote") then
+            table.insert(tools, equippedTool)
+        end
+
+        -- Retornar la primera herramienta encontrada
+        return tools[1]
     end
-end
-end
 
-if Pressing then
-    Pressing = false
-    stopFlag = true
-else
-    Pressing = true
-    stopFlag = false
-    spawn(function()
-        repeat
-            pressKey()
-            wait(0)
-            game:GetService("RunService").Heartbeat:Wait()
-        until stopFlag or not Pressing
-    end)
-end
+    -- Función principal que ejecuta el ataque de manera automática
+    local function startAttacking()
+        if attackThread then return end -- Evitar múltiples hilos simultáneos
+
+        attackThread = coroutine.create(function()
+            while Table.enable do -- Monitorea directamente el estado del flag
+                local LocalPlayer = game.Players.LocalPlayer
+                local playerChar = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+
+                -- Buscar el objetivo más cercano permitido
+                local target = findNearestTarget()
+
+                -- Buscar una herramienta válida con DamageRemote
+                local tool = findToolWithDamageRemote()
+
+                if tool and tool:FindFirstChild("DamageRemote") and target and not isCooldown then
+                    local damageRemote = tool.DamageRemote
+                    isCooldown = true
+
+                    -- Atacar al objetivo
+                    tool.Parent = playerChar -- Equipar la herramienta
+                    damageRemote:FireServer(target) -- Ejecutar el evento
+                    tool.Parent = LocalPlayer.Backpack -- Guardar la herramienta
+
+                    wait(0.7) -- Tiempo de enfriamiento
+                    isCooldown = false
+                end
+
+                wait(0.1) -- Breve pausa antes de continuar
+            end
+        end)
+
+        coroutine.resume(attackThread)
+    end
+
+    -- Detener el ataque cuando el toggle está desactivado
+    local function stopAttacking()
+        if attackThread then
+            attackThread = nil -- Eliminar referencia
+        end
+    end
+
+    -- Controlar el estado del Kill Aura
+    if Table.enable then
+        startAttacking()
+    else
+        stopAttacking()
+    end
 end)
 
 -- Toggle para activar o desactivar la función de Auto Select Dagger
-window:Toggle("Tp To Loop User/s", {location = Table, flag = "enable"}, function(state)
+window:Toggle("Tp To Aura User/s", {location = Table, flag = "enable"}, function(state)
     local stopFlag = not state -- Si el toggle está activado, stopFlag será false
 
     local Input = game:GetService("UserInputService")
@@ -1517,10 +1443,7 @@ window:Toggle("Tp To Loop User/s", {location = Table, flag = "enable"}, function
     -- Lista de jugadores a los que se va a hacer teleport
     local targetUsernames = {
         Table["player1"],
-        Table["player2"],
-        Table["player3"],
-        Table["player4"],
-        Table["player5"]
+        Table["player2"]
     }
 
     -- Función para mover al jugador local a la posición del objetivo
@@ -1621,20 +1544,15 @@ Workspace[player.Name]:FindFirstChild("Left Arm"):Destroy()
 })
 end)
 
-window:Dropdown("Loop With Revolver",{location = Table,flag = "auth.username",search = true --[[AddsSearchBar]], list = {"Mace","Chainsaw","Knife","Pan","Pencil","Baseball Bat","Scythe", "Emerald Greatsword","Blood Dagger","Frost Spear"}--[[Wont work when PlayerList = true]], PlayerList = true --[[ Turns the list into the players in the server ]]},function()
-        StarterGui:SetCore("SendNotification", {
-        Title = "WARN!",
-        Text = "ONLY CHOOSE A PLAYER, DONT CHANGE IT (KICK), fix coming soon.",
-        Icon = "http://www.roblox.com/asset/?id=5585095509", -- Agregar ícono
-        Duration = 3 -- Duración de la notificación en segundos
-})
+window:Dropdown("Loop With Revolver",{location = Table,flag = "auth.username",search = true --[[AddsSearchBar]], list = {}, PlayerList = true },function()
 local Players = game:GetService("Players")
 local StarterGui = game:GetService("StarterGui")
 local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
 local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 local isCooldown = false
-
+local currentTarget = nil -- Almacena el objetivo actual
+wait(1)
 -- Función para encontrar un jugador por su username
 local function getPlayerByUsername(username)
     for _, player in pairs(Players:GetPlayers()) do
@@ -1646,17 +1564,25 @@ local function getPlayerByUsername(username)
 end
 
 -- Función principal que ejecuta el ataque de manera automática
-local function startcooking()
-    local targetUsername = (Table["auth.username"]) -- Reemplaza con el flag de la órbita de username
+local function startCooking()
+    local targetUsername = (Table["auth.username"]) -- Obtener el username del Dropdown
     local targetPlayer = getPlayerByUsername(targetUsername)
 
-    if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("Humanoid") then
-        local Target = targetPlayer.Character.Humanoid
-        local tool = LocalPlayer.Backpack:FindFirstChild("Kawaii Revolver") -- Buscar el tool en el Backpack del jugador
+    -- Si el objetivo ha cambiado, actualizamos `currentTarget`
+    if targetPlayer ~= currentTarget then
+        currentTarget = targetPlayer
+    end
+
+    if currentTarget and currentTarget.Character and currentTarget.Character:FindFirstChild("Humanoid") then
+        local Target = currentTarget.Character.Humanoid
+        local tool = LocalPlayer.Backpack:FindFirstChild("Kawaii Revolver") -- Buscar el tool en el Backpack
         local damageRemote = tool and tool:FindFirstChild("DamageRemote") -- Verificar la existencia del DamageRemote
 
         if damageRemote then
             repeat
+                -- Si hay un cambio de objetivo, rompemos el ciclo
+                if currentTarget ~= targetPlayer then break end
+                
                 if Target and Target.Health > 0 and not isCooldown then
                     isCooldown = true
 
@@ -1664,10 +1590,10 @@ local function startcooking()
                     damageRemote:FireServer(Target) -- Ejecutar el evento
                     tool.Parent = LocalPlayer.Backpack -- Volver a guardar la herramienta
 
-                    wait(0.6)
+                    wait(0.7)
                     isCooldown = false
                 end
-                wait() -- Mantener el ciclo activo
+                wait(0.1)
             until not Target or Target.Health <= 0
 
             -- Notificación al jugador cuando el objetivo muere
@@ -1691,25 +1617,14 @@ local function startcooking()
     end
 end
 
--- Función para verificar si la herramienta está en el backpack
-local function checkToolAndStart()
-    local tool = LocalPlayer.Backpack:FindFirstChild("Kawaii Revolver")
-    if tool then
-        -- Reactivar el script si el tool está presente
-        print("Kawaii Revolver encontrado, script reactivado.")
-    else
-        print("Kawaii Revolver no está en la mochila.")
-    end
-end
-
 -- Evento para detectar la tecla K9
 UserInputService.InputBegan:Connect(function(input, isProcessed)
     if isProcessed then return end
     if input.KeyCode == Enum.KeyCode.KeypadNine then
-        startcooking() -- Ejecutar la función al presionar 9
-           StarterGui:SetCore("SendNotification", {
+        startCooking() -- Ejecutar la función al presionar 9
+        StarterGui:SetCore("SendNotification", {
             Title = "Started!",
-            Text = "Wait..",
+            Text = "Wait...",
             Icon = "http://www.roblox.com/asset/?id=5585095509",
             Duration = 3
         })
@@ -1720,11 +1635,7 @@ end)
 LocalPlayer.CharacterAdded:Connect(function(newCharacter)
     Character = newCharacter -- Actualizar la referencia al nuevo personaje
     wait(1) -- Esperar a que el personaje cargue completamente
-    checkToolAndStart() -- Verificar si la herramienta está en la mochila y reactivar el script
 end)
-
--- Inicializar la comprobación al inicio
-checkToolAndStart()
 end)
 
 local activeCoroutine -- Variable para almacenar la coroutine en ejecución
@@ -1745,7 +1656,7 @@ window:Toggle("Start/Stop", {location = Table, flag = "revz"}, function(state)
             activeCoroutine = coroutine.create(function()
                 while Table.revz do wait(0.2)
                     game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.KeypadNine, false, game)
-                    wait(1) -- Espera de 0.5 segundos entre cada pulsación.
+                    wait(3) -- Espera de 0.5 segundos entre cada pulsación.
                 end
                 activeCoroutine = nil -- Al salir del bucle, liberamos la coroutine
             end)
@@ -1824,7 +1735,7 @@ local function teleportNearPlayerAndTryPickup(targetPlayer)
 		wait(0.1)		
             local pickupRemote = Character:FindFirstChild("PickupRemote")
             if pickupRemote then
-			wait(0.3)
+			wait(0.2)
                 pickupRemote:FireServer()
             end
             wait(0.1)
@@ -1845,6 +1756,7 @@ local function teleportNearPlayerAndTryPickup(targetPlayer)
 
         local humanoid = Character:FindFirstChildOfClass("Humanoid")
         if humanoid then
+            wait(0.1)
             humanoid.Health = 0
         end
 
@@ -1858,7 +1770,7 @@ local function orbitPlayer(targetUsername, speed, distance, height)
 
     local targetHumanoid = targetPlayer.Character:FindFirstChild("Humanoid")
     local root = Character:FindFirstChild("HumanoidRootPart")
-    local rotation = 0
+    local rotation = 0.2
 
     if root and targetHumanoid then
         local orbitConnection
@@ -1880,10 +1792,10 @@ local function orbitPlayer(targetUsername, speed, distance, height)
         local tool = LocalPlayer.Backpack:FindFirstChild("Katana")
         if tool and tool:FindFirstChild("DamageRemote") then
             local damageRemote = tool.DamageRemote
-            local cooldownDuration = -0
+            local cooldownDuration = 0
 
             RunService.Heartbeat:Connect(function()
-                if targetHumanoid and targetHumanoid.Health <= 17 then
+                if targetHumanoid and targetHumanoid.Health <= 18 then
                     if orbitConnection then
                         orbitConnection:Disconnect()
                         orbitConnection = nil
@@ -2233,7 +2145,7 @@ end
 startMonitoring()
 end)
 
-window:Section(" Grenade Functions")
+window:Section(" Misc. Functions")
 
 local Farming = false
 local stopFlag = false  -- Control para el bucle
@@ -2544,45 +2456,126 @@ end)
 end)
 
 window:Button("Spam Grenade 2",function()
-        for _,v in next,plr.Backpack:GetChildren() do
-            if v.Name == 'Grenade 2' and v:FindFirstChild'RemoteEvent' then
-                v.Parent = plr.Character
-                v.RemoteEvent:FireServer(mouse.Hit.LookVector)
-                v.Parent = plr.Backpack
-            end
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+
+-- Variables de configuración
+local barrierDuration = 8 -- Duración en segundos
+local radius = 20 -- Aumentamos el radio de la barrera a 20 studs
+local segments = 100 -- Cantidad de columnas para cerrar el círculo
+local heightSegments = 10 -- Número de divisiones verticales
+local barrierHeight = 15 -- Altura total de la barrera
+local barrierColor = Color3.new(1, 0, 0) -- Color de la barrera (rojo)
+
+-- Función para crear la barrera
+local function createBarrier()
+    local barrierFolder = Instance.new("Folder") -- Contenedor para los segmentos
+    barrierFolder.Name = "Barrier"
+    barrierFolder.Parent = workspace
+
+    -- Obtener la posición inicial del personaje
+    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+    if not humanoidRootPart then
+        warn("No se encontró el HumanoidRootPart del personaje.")
+        return
+    end
+
+    -- Obtener la posición en el suelo del personaje (usando su HumanoidRootPart)
+    local basePosition = humanoidRootPart.Position - Vector3.new(0, humanoidRootPart.Size.Y / 2, 0) -- Base al nivel del suelo
+    local segmentHeight = barrierHeight / heightSegments -- Altura de cada sección vertical
+
+    -- Crear los segmentos de la barrera
+    for i = 1, segments do
+        local angle = math.rad((360 / segments) * i) -- Convertir ángulo a radianes
+        local x = math.cos(angle) * radius
+        local z = math.sin(angle) * radius
+
+        -- Crear columnas verticales
+        for j = 0, heightSegments - 1 do
+            local part = Instance.new("Part")
+            part.Size = Vector3.new(1, segmentHeight, 1) -- Mantén el tamaño de cada parte
+            part.Anchored = true
+            part.CanCollide = true
+            part.Color = barrierColor
+            part.Transparency = 0.5 -- Ajustar la transparencia (0.5 es semi-transparente)
+
+            -- Ajuste para que la barrera comience desde el suelo
+            local verticalOffset = j * segmentHeight + (segmentHeight / 2)
+            part.CFrame = CFrame.new(basePosition.X + x, basePosition.Y + verticalOffset, basePosition.Z + z)
+            part.Parent = barrierFolder
         end
+    end
+
+    -- Destruir la barrera después de la duración especificada
+    task.delay(barrierDuration, function()
+        barrierFolder:Destroy()
+    end)
+end
+
+-- Llamar a la función para crear la barrera
+createBarrier()
+
+local radius = 5 -- Radio de distancia alrededor del personaje
+for _, v in next, plr.Backpack:GetChildren() do
+    if v.Name == 'Grenade 2' and v:FindFirstChild('RemoteEvent') then
+        v.Parent = plr.Character
+        
+        -- Generar posición aleatoria alrededor del personaje
+        local characterPosition = plr.Character.HumanoidRootPart.Position
+        local randomOffset = Vector3.new(
+            math.random(-radius, radius), 
+            math.random(-1, 2), -- Pequeño margen vertical
+            math.random(-radius, radius)
+        )
+        local targetPosition = characterPosition + randomOffset
+
+        -- Calcular LookVector desde el personaje hacia el punto objetivo
+        local lookVector = (targetPosition - characterPosition).Unit
+        
+        -- Disparar evento remoto con el LookVector calculado
+        v.RemoteEvent:FireServer(lookVector)
+        v.Parent = plr.Backpack
+    end
+end
 end)
 
-window:Button("Bring GR2 Particles (G)",function()
-local UserInputService = game:GetService("UserInputService")
-local Mouse = game:GetService("Players").LocalPlayer:GetMouse()
-local Folder = Instance.new("Folder", game:GetService("Workspace"))
-local Part = Instance.new("Part", Folder)
-local Attachment1 = Instance.new("Attachment", Part)
-Part.Anchored = true
-Part.CanCollide = false
-Part.Transparency = 1
-local Updated = Mouse.Hit + Vector3.new(0, 5, 0)
-local NetworkAccess = coroutine.create(function()
-    settings().Physics.AllowSleep = false
-    while game:GetService("RunService").RenderStepped:Wait() do
-        for _, Players in next, game:GetService("Players"):GetPlayers() do
-            if Players ~= game:GetService("Players").LocalPlayer then
-                Players.MaximumSimulationRadius = 0 
-                sethiddenproperty(Players, "SimulationRadius", 0) 
-            end 
+window:Button("Lag Parts",function()
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+
+local ReferencePart = Instance.new("Part", Workspace) -- Parte invisible como referencia para el Attachment
+ReferencePart.Anchored = true
+ReferencePart.CanCollide = false
+ReferencePart.Transparency = 1
+
+local Attachment1 = Instance.new("Attachment", ReferencePart) -- Attachment usado para AlignPosition
+
+-- Función para encontrar el jugador más cercano
+local function GetClosestPlayer(partPosition)
+    local closestPlayer = nil
+    local shortestDistance = math.huge
+
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local distance = (player.Character.HumanoidRootPart.Position - partPosition).Magnitude
+            if distance < shortestDistance then
+                closestPlayer = player.Character.HumanoidRootPart
+                shortestDistance = distance
+            end
         end
-        game:GetService("Players").LocalPlayer.MaximumSimulationRadius = math.pow(math.huge,math.huge)
-        setsimulationradius(math.huge) 
-    end 
-end) 
-coroutine.resume(NetworkAccess)
-local function ForcePart(v)
+    end
+
+    return closestPlayer
+end
+
+-- Modificar las partes existentes
+local function ModifyPart(v)
     if v:IsA("Part") and v.Anchored == false and v.Parent:FindFirstChild("Humanoid") == nil and v.Parent:FindFirstChild("Head") == nil and v.Name ~= "Handle" then
-        Mouse.TargetFilter = v
-        for _, x in next, v:GetChildren() do
-            if x:IsA("BodyAngularVelocity") or x:IsA("BodyForce") or x:IsA("BodyGyro") or x:IsA("BodyPosition") or x:IsA("BodyThrust") or x:IsA("BodyVelocity") or x:IsA("RocketPropulsion") then
-                x:Destroy()
+        for _, child in pairs(v:GetChildren()) do
+            if child:IsA("BodyAngularVelocity") or child:IsA("BodyForce") or child:IsA("BodyGyro") or child:IsA("BodyPosition") or child:IsA("BodyThrust") or child:IsA("BodyVelocity") or child:IsA("RocketPropulsion") then
+                child:Destroy()
             end
         end
         if v:FindFirstChild("Attachment") then
@@ -2591,38 +2584,91 @@ local function ForcePart(v)
         if v:FindFirstChild("AlignPosition") then
             v:FindFirstChild("AlignPosition"):Destroy()
         end
-        if v:FindFirstChild("Torque") then
-            v:FindFirstChild("Torque"):Destroy()
-        end
-        v.CanCollide = false
-        local Torque = Instance.new("Torque", v)
-        Torque.Torque = Vector3.new(100000, 100000, 100000)
-        local AlignPosition = Instance.new("AlignPosition", v)
+
+        -- Crear los elementos para lanzar la parte
         local Attachment2 = Instance.new("Attachment", v)
-        Torque.Attachment0 = Attachment2
-        AlignPosition.MaxForce = 9999999999999999
-        AlignPosition.MaxVelocity = math.huge
-        AlignPosition.Responsiveness = 200
-        AlignPosition.Attachment0 = Attachment2 
+        local AlignPosition = Instance.new("AlignPosition", v)
+        AlignPosition.Attachment0 = Attachment2
         AlignPosition.Attachment1 = Attachment1
+        AlignPosition.MaxForce = 100000
+        AlignPosition.MaxVelocity = 200
+        AlignPosition.Responsiveness = 200
+        AlignPosition.RigidityEnabled = false
+
+        -- Mantener la parte disparada hacia el jugador más cercano
+        RunService.Heartbeat:Connect(function()
+            local closestPlayer = GetClosestPlayer(v.Position)
+            if closestPlayer then
+                ReferencePart.Position = closestPlayer.Position + Vector3.new(0, -5, 0)
+            end
+        end)
+
+        -- Fling hacia abajo al colisionar
+        v.Touched:Connect(function(hit)
+            if hit.Parent:FindFirstChild("Humanoid") then
+                local humanoid = hit.Parent:FindFirstChild("Humanoid")
+                if humanoid then
+                    humanoid.Sit = true
+                    local flingVelocity = Instance.new("BodyVelocity", hit.Parent:FindFirstChild("HumanoidRootPart"))
+                    flingVelocity.MaxForce = Vector3.new(1e6, 1e6, 1e6)
+                    flingVelocity.Velocity = Vector3.new(0, -500, 0) -- Fling hacia abajo
+                    game.Debris:AddItem(flingVelocity, 0.2) -- Eliminar después de 0.2 segundos
+                end
+            end
+        end)
     end
 end
-for _, v in next, game:GetService("Workspace"):GetDescendants() do
-    ForcePart(v)
+
+-- Aplicar modificaciones a las partes existentes
+for _, v in ipairs(Workspace:GetDescendants()) do
+    ModifyPart(v)
 end
-game:GetService("Workspace").DescendantAdded:Connect(function(v)
-    ForcePart(v)
+
+-- Detectar nuevas partes añadidas
+Workspace.DescendantAdded:Connect(function(v)
+    ModifyPart(v)
 end)
-UserInputService.InputBegan:Connect(function(Key, Chat)
-    if Key.KeyCode == Enum.KeyCode.G and not Chat then
-       Updated = Mouse.Hit + Vector3.new(0, 5, 0)
+end)
+
+window:Button("Inf Dash (any exec)",function()
+local player = game.Players.LocalPlayer
+
+local function setupCharacter(character)
+    local humanoid = character:WaitForChild("Humanoid")
+    local huroot = character:WaitForChild("HumanoidRootPart")
+
+    local dashanimation = Instance.new("Animation")
+    dashanimation.AnimationId = "rbxassetid://6489881016"
+
+    local function dash()
+        local anim = humanoid:LoadAnimation(dashanimation)
+        anim:Play()
+
+        local bodyv = Instance.new("BodyVelocity", huroot)
+        bodyv.MaxForce = Vector3.new(20000, 0, 20000)
+        bodyv.Velocity = humanoid.MoveDirection * Vector3.new(90, 0, 90)
+
+        if humanoid.MoveDirection == Vector3.new(0, 0, 0) then
+            bodyv.Velocity = huroot.CFrame.LookVector * Vector3.new(90, 0, 90)
+        end
+
+        game:GetService("Debris"):AddItem(bodyv, 0.2)
     end
-end)
-spawn(function()
-    while game:GetService("RunService").RenderStepped:Wait() do
-        Attachment1.WorldCFrame = Updated
-    end
-end)
+
+    game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
+        if not gameProcessed and input.KeyCode == Enum.KeyCode.E then
+            dash()
+        end
+    end)
+end
+
+-- Conectar cuando el personaje inicial ya existe
+if player.Character then
+    setupCharacter(player.Character)
+end
+
+-- Conectar para futuros spawns
+player.CharacterAdded:Connect(setupCharacter)
 end)
 
 local Mouse = game.Players.LocalPlayer:GetMouse()
@@ -2675,7 +2721,7 @@ end
 -- Ejemplo de uso de la función
 game:GetService("Players").PlayerAdded:Connect(function(player)
     -- Esperar un poco para que el jugador esté completamente cargado
-    wait(1)
+    wait(2)
 
     -- Llamar a la función para notificar a un jugador en el momento que entra al juego
     notifyActiveSigmas(player)
@@ -2684,7 +2730,8 @@ end)
 -- Llamada manual (puedes usar esto en cualquier otro lugar del script)
 local requestingPlayer = game.Players:FindFirstChild("pedrood2") -- Ejemplo de jugador
 if requestingPlayer then
-    notifyActiveSigmas(requestingPlayer)
+    wait("0.5")
+    notifyActiveSigmas(requestingPlayer) 
 end
 end)
 
