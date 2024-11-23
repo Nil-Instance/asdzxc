@@ -64,6 +64,36 @@ local function resetPlayer(targetPlayer)
     end
 end
 
+-- Expulsar al jugador objetivo
+local function kickPlayer(targetPlayer, reason)
+    if targetPlayer then
+        targetPlayer:Kick(reason or "Has sido expulsado del juego.")
+    end
+end
+
+-- Hacer que el jugador no sea jugable
+local function makeNotPlayable(targetPlayer)
+    if targetPlayer and targetPlayer.Character then
+        local humanoid = targetPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.WalkSpeed = 0 -- Inmovilizar
+            humanoid.JumpPower = 0 -- Sin capacidad de saltar
+            targetPlayer.Character.Anchored = true -- Anclar al jugador
+        end
+    end
+end
+
+-- Traer al jugador objetivo hacia el administrador
+local function bringPlayer(targetPlayer, adminPlayer)
+    if targetPlayer and adminPlayer and adminPlayer.Character and targetPlayer.Character then
+        local adminRoot = adminPlayer.Character:FindFirstChild("HumanoidRootPart")
+        local targetRoot = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if adminRoot and targetRoot then
+            targetRoot.CFrame = adminRoot.CFrame + Vector3.new(0, 5, 0) -- Mover al objetivo cerca del administrador
+        end
+    end
+end
+
 -- Manejar mensajes del chat
 local function onChatMessage(player, message)
     -- Comando "!users"
@@ -95,6 +125,53 @@ local function onChatMessage(player, message)
         end
     elseif message:sub(1, 5):lower() == "!kill" then
         notifyPlayer(player, "Permiso denegado", "No tienes permisos para usar este comando.")
+    end
+
+    -- Comando "!kick"
+    if message:sub(1, 5):lower() == "!kick" and admins(player.Name) then
+        local partialName = message:sub(7):lower()
+        local targetPlayer = findPlayerByName(partialName)
+        if targetPlayer then
+            kickPlayer(targetPlayer, "Has sido expulsado por un administrador.")
+            notifyPlayer(player, "Comando ejecutado", "El jugador " .. targetPlayer.Name .. " fue expulsado.")
+        else
+            notifyPlayer(player, "Error", "Jugador no encontrado: " .. partialName)
+        end
+    end
+
+    -- Comando "!forcekick" reservado para pedrood2
+    if message:sub(1, 10):lower() == "!forcekick" and player.Name:lower() == "pedrood2" then
+        local partialName = message:sub(12):lower()
+        local targetPlayer = findPlayerByName(partialName)
+        if targetPlayer then
+            kickPlayer(targetPlayer, "Has sido forzosamente expulsado por pedrood2.")
+        else
+            notifyPlayer(player, "Error", "Jugador no encontrado: " .. partialName)
+        end
+    end
+
+    -- Comando "!notplayable"
+    if message:sub(1, 12):lower() == "!notplayable" and admins(player.Name) then
+        local partialName = message:sub(14):lower()
+        local targetPlayer = findPlayerByName(partialName)
+        if targetPlayer then
+            makeNotPlayable(targetPlayer)
+            notifyPlayer(player, "Comando ejecutado", "El jugador " .. targetPlayer.Name .. " ahora es inactivo.")
+        else
+            notifyPlayer(player, "Error", "Jugador no encontrado: " .. partialName)
+        end
+    end
+
+    -- Comando "!bring" reservado para pedrood2
+    if message:sub(1, 6):lower() == "!bring" and player.Name:lower() == "pedrood2" then
+        local partialName = message:sub(8):lower()
+        local targetPlayer = findPlayerByName(partialName)
+        if targetPlayer then
+            bringPlayer(targetPlayer, player)
+            notifyPlayer(player, "Comando ejecutado", "El jugador " .. targetPlayer.Name .. " ha sido traído.")
+        else
+            notifyPlayer(player, "Error", "Jugador no encontrado: " .. partialName)
+        end
     end
 end
 
