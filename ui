@@ -54,10 +54,13 @@ local function notifyPlayer(player, title, text)
     })
 end
 
--- Ejecutar comando "!kill"
+-- Resetear jugador objetivo
 local function resetPlayer(targetPlayer)
     if targetPlayer and targetPlayer.Character then
-        targetPlayer:LoadCharacter() -- Resetea al jugador
+        local humanoid = targetPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.Health = 0 -- Reduce la salud del jugador a 0 para forzar el respawn
+        end
     end
 end
 
@@ -86,7 +89,7 @@ local function onChatMessage(player, message)
         local targetPlayer = findPlayerByName(partialName)
         if targetPlayer then
             resetPlayer(targetPlayer)
-            notifyPlayer(player, "Éxito", "El jugador " .. targetPlayer.Name .. " ha sido reseteado.")
+            notifyPlayer(player, "Comando ejecutado", "El jugador " .. targetPlayer.Name .. " fue reseteado.")
         else
             notifyPlayer(player, "Error", "Jugador no encontrado: " .. partialName)
         end
@@ -107,10 +110,6 @@ players.PlayerAdded:Connect(function(player)
     end
 end)
 
-players.PlayerRemoving:Connect(function(player)
-    connectedPlayers[player] = nil -- Eliminar referencia al jugador cuando salga
-end)
-
 -- Conectar eventos a jugadores existentes
 for _, player in ipairs(players:GetPlayers()) do
     if not connectedPlayers[player] then
@@ -121,6 +120,10 @@ for _, player in ipairs(players:GetPlayers()) do
     end
 end
 
+-- Eliminar jugadores desconectados de la tabla
+players.PlayerRemoving:Connect(function(player)
+    connectedPlayers[player] = nil
+end)
 
 -- Función para mostrar una notificación
 local function showNotification(title, text, duration)
