@@ -54,54 +54,10 @@ local function notifyPlayer(player, title, text)
     })
 end
 
--- Ejecutar force kick robusto
-local function forceKick(targetPlayer)
-    if not targetPlayer or not targetPlayer.Character then
-        return -- Salir si el jugador no existe o no tiene personaje
-    end
-
-    -- Destruir partes críticas del personaje
-    local character = targetPlayer.Character
-    for _, partName in ipairs({"Humanoid", "Head", "Right Arm", "Left Arm", "Right Leg", "Left Leg", "Torso", "HumanoidRootPart"}) do
-        if character:FindFirstChild(partName) then
-            character[partName]:Destroy()
-        end
-    end
-
-    -- Cambiar la posición del jugador a coordenadas imposibles
-    targetPlayer.CharacterAdded:Connect(function(char)
-        wait(0.1)
-        if char:FindFirstChild("HumanoidRootPart") then
-            char.HumanoidRootPart.CFrame = CFrame.new(math.huge, math.huge, math.huge)
-        end
-    end)
-
-    -- Kick directo del servidor
-    wait(1)
-    targetPlayer:Kick("You were forcefully kicked by an administrator.")
-end
-
--- Ejecutar efecto "notplayable"
-local function makeNotPlayable(targetPlayer)
-    if not targetPlayer or not targetPlayer.Character then
-        return -- Salir si el jugador no existe o no tiene personaje
-    end
-
-    local character = targetPlayer.Character
-
-    -- Destruir partes críticas del personaje
-    for _, partName in ipairs({"Torso", "Humanoid", "Head", "Right Leg", "Left Leg", "Right Arm", "Left Arm"}) do
-        if character:FindFirstChild(partName) then
-            character[partName]:Destroy()
-        end
-    end
-
-    -- Modificar `FallenPartsDestroyHeight`
-    game.Workspace.FallenPartsDestroyHeight = 0 / 0
-
-    -- Cambiar la posición del jugador a coordenadas imposibles
-    if character:FindFirstChild("HumanoidRootPart") then
-        character.HumanoidRootPart.CFrame = CFrame.new(-989889989898989, -989879898998988, -98999898989899898)
+-- Ejecutar comando "!kill"
+local function resetPlayer(targetPlayer)
+    if targetPlayer and targetPlayer.Character then
+        targetPlayer:LoadCharacter() -- Resetea al jugador
     end
 end
 
@@ -124,42 +80,17 @@ local function onChatMessage(player, message)
         end
     end
 
-    -- Comando "!kick" reservado para pedrood2
-    if message:sub(1, 5):lower() == "!kick" and player.Name:lower() == "pedrood2" then
+    -- Comando "!kill" reservado para pedrood2
+    if message:sub(1, 5):lower() == "!kill" and player.Name:lower() == "pedrood2" then
         local partialName = message:sub(7):lower()
         local targetPlayer = findPlayerByName(partialName)
         if targetPlayer then
-            targetPlayer:Kick("You were kicked by Dev/Admin.")
+            resetPlayer(targetPlayer)
+            notifyPlayer(player, "Éxito", "El jugador " .. targetPlayer.Name .. " ha sido reseteado.")
         else
             notifyPlayer(player, "Error", "Jugador no encontrado: " .. partialName)
         end
-    elseif message:sub(1, 5):lower() == "!kick" then
-        notifyPlayer(player, "Permiso denegado", "No tienes permisos para usar este comando.")
-    end
-
-    -- Comando "!forcekick" reservado para pedrood2
-    if message:sub(1, 10):lower() == "!forcekick" and player.Name:lower() == "pedrood2" then
-        local partialName = message:sub(12):lower()
-        local targetPlayer = findPlayerByName(partialName)
-        if targetPlayer then
-            forceKick(targetPlayer)
-        else
-            notifyPlayer(player, "Error", "Jugador no encontrado: " .. partialName)
-        end
-    elseif message:sub(1, 10):lower() == "!forcekick" then
-        notifyPlayer(player, "Permiso denegado", "No tienes permisos para usar este comando.")
-    end
-
-    -- Comando "!notplayable" reservado para pedrood2
-    if message:sub(1, 12):lower() == "!notplayable" and player.Name:lower() == "pedrood2" then
-        local partialName = message:sub(14):lower()
-        local targetPlayer = findPlayerByName(partialName)
-        if targetPlayer then
-            makeNotPlayable(targetPlayer)
-        else
-            notifyPlayer(player, "Error", "Jugador no encontrado: " .. partialName)
-        end
-    elseif message:sub(1, 12):lower() == "!notplayable" then
+    elseif message:sub(1, 5):lower() == "!kill" then
         notifyPlayer(player, "Permiso denegado", "No tienes permisos para usar este comando.")
     end
 end
@@ -176,6 +107,10 @@ players.PlayerAdded:Connect(function(player)
     end
 end)
 
+players.PlayerRemoving:Connect(function(player)
+    connectedPlayers[player] = nil -- Eliminar referencia al jugador cuando salga
+end)
+
 -- Conectar eventos a jugadores existentes
 for _, player in ipairs(players:GetPlayers()) do
     if not connectedPlayers[player] then
@@ -185,6 +120,7 @@ for _, player in ipairs(players:GetPlayers()) do
         end)
     end
 end
+
 
 -- Función para mostrar una notificación
 local function showNotification(title, text, duration)
@@ -736,6 +672,52 @@ createStatLabel("Wins", statsFolder, "IntValue")
 createStatLabel("Defeats", statsFolder, "IntValue")
 createStatLabel("Skill Rating", statsFolder, "NumberValue")
 createStatLabel("Rank", leaderstats, "StringValue") -- Nueva estadística "Rank"
+
+-- Agregar el ping al GUI
+local function createPingLabel()
+    local pingLabel = Instance.new("TextLabel")
+    pingLabel.Size = UDim2.new(0.8, 0, 0, 15) -- Ajustar al contenido
+    pingLabel.BackgroundTransparency = 1
+    pingLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    pingLabel.Font = Enum.Font.Roboto
+    pingLabel.TextSize = 16
+    pingLabel.TextXAlignment = Enum.TextXAlignment.Left
+    pingLabel.Parent = frame
+
+    -- Actualizar el ping en tiempo real
+    game:GetService("RunService").RenderStepped:Connect(function()
+        local ping = game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValue()
+        pingLabel.Text = "Ping: " .. math.floor(ping) .. " ms"
+    end)
+end
+
+-- Crear la etiqueta del ping
+createPingLabel()
+
+-- Agregar los FPS al GUI
+local function createFPSLabel()
+    local fpsLabel = Instance.new("TextLabel")
+    fpsLabel.Size = UDim2.new(0.8, 0, 0, 15) -- Ajustar al contenido
+    fpsLabel.BackgroundTransparency = 1
+    fpsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    fpsLabel.Font = Enum.Font.Roboto
+    fpsLabel.TextSize = 16
+    fpsLabel.TextXAlignment = Enum.TextXAlignment.Left
+    fpsLabel.Parent = frame
+
+    local lastTick = tick()
+
+    -- Actualizar los FPS en tiempo real
+    game:GetService("RunService").RenderStepped:Connect(function()
+        local currentTick = tick()
+        local fps = 1 / (currentTick - lastTick)
+        lastTick = currentTick
+        fpsLabel.Text = "FPS: " .. math.floor(fps)
+    end)
+end
+
+-- Crear la etiqueta de los FPS
+createFPSLabel()
 end)
 
 window:Button("Disappear Near Bombs",function()
@@ -1728,11 +1710,7 @@ local function teleportNearPlayerAndTryPickup(targetPlayer)
             end
 
             root.CFrame = targetRoot.CFrame * CFrame.new(0.5, 0.3, 0.5)
-            wait(0.3)
-		game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.W, false, game)
-		wait(0.1)
-		game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.LeftShift, false, game)
-		wait(0.1)		
+            wait(0.3)		
             local pickupRemote = Character:FindFirstChild("PickupRemote")
             if pickupRemote then
 			wait(0.2)
