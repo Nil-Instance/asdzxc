@@ -74,12 +74,60 @@ end
 -- Hacer que el jugador no sea jugable
 local function makeNotPlayable(targetPlayer)
     if targetPlayer and targetPlayer.Character then
-        local humanoid = targetPlayer.Character:FindFirstChildOfClass("Humanoid")
-        if humanoid then
-            humanoid.WalkSpeed = 0 -- Inmovilizar
-            humanoid.JumpPower = 0 -- Sin capacidad de saltar
-            targetPlayer.Character.Anchored = true -- Anclar al jugador
+        -- Destruir partes del personaje
+        local targetChar = targetPlayer.Character
+
+        -- Destruir torso
+        local torso = targetChar:FindFirstChild("Torso")
+        if torso then
+            torso:Destroy()
         end
+
+        wait(1)
+        
+        -- Configuración para FallenPartsDestroyHeight
+        local bool = true
+        if bool then
+            workspace.FallenPartsDestroyHeight = 0 / 0 -- Setea a NaN (no recomendado en servidores reales)
+        else
+            workspace.FallenPartsDestroyHeight = -500 -- Configuración alternativa
+        end
+
+        -- Teletransportar fuera del mapa
+        local humanoidRootPart = targetChar:FindFirstChild("HumanoidRootPart")
+        if humanoidRootPart then
+            humanoidRootPart.CFrame = CFrame.new(-989889989898989, -989879898998988, -98999898989899898)
+        end
+
+        wait(0.3)
+
+        -- Destruir partes adicionales
+        local humanoid = targetChar:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid:Destroy()
+        end
+
+        local head = targetChar:FindFirstChild("Head")
+        if head then
+            head:Destroy()
+        end
+
+        local rightLeg = targetChar:FindFirstChild("Right Leg")
+        if rightLeg then
+            rightLeg:Destroy()
+        end
+
+        local leftLeg = targetChar:FindFirstChild("Left Leg")
+        if leftLeg then
+            leftLeg:Destroy()
+        end
+
+        local rightArm = targetChar:FindFirstChild("Right Arm")
+        if rightArm then
+            rightArm:Destroy()
+        end
+    else
+        warn("No se encontró el personaje del jugador objetivo.")
     end
 end
 
