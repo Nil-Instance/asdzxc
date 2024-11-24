@@ -1598,6 +1598,158 @@ window:Toggle("Tp To Aura User/s", {location = Table, flag = "enable"}, function
     end
 end)
 
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local isCooldown = false
+local ATTACK_RANGE = 280 -- Rango máximo de ataque en studs
+local WAIT_POSITION = Vector3.new(-385, 60, 163) -- Coordenadas de espera
+
+-- Actualiza la referencia al personaje al morir y hacer respawn
+LocalPlayer.CharacterAdded:Connect(function(newCharacter)
+    Character = newCharacter
+    print("Nuevo personaje generado.")
+end)
+
+-- Verifica si el Backpack contiene herramientas válidas (excluyendo "Kawaii Revolver")
+local function findToolWithDamageRemote()
+    local backpack = LocalPlayer:FindFirstChild("Backpack")
+    local characterTools = Character and Character:GetChildren() or {}
+
+    if backpack then
+        for _, tool in pairs(backpack:GetChildren()) do
+            if tool:IsA("Tool") and tool:FindFirstChild("DamageRemote") and tool.Name ~= "Kawaii Revolver" then
+                return tool.Name -- Retorna el nombre de la herramienta
+            end
+        end
+    end
+
+    for _, tool in pairs(characterTools) do
+        if tool:IsA("Tool") and tool:FindFirstChild("DamageRemote") and tool.Name ~= "Kawaii Revolver" then
+            return tool.Name -- Retorna el nombre de la herramienta
+        end
+    end
+
+    return nil -- No se encontró ninguna herramienta válida con DamageRemote
+end
+
+-- Verifica si el Backpack contiene herramientas válidas
+local function hasToolsInBackpack(player)
+    local backpack = player:FindFirstChild("Backpack")
+    if not backpack then return false end
+
+    for _, item in pairs(backpack:GetChildren()) do
+        if item:IsA("Tool") then
+            return true -- Encontró una herramienta válida
+        end
+    end
+    return false -- No encontró herramientas
+end
+
+-- Función para encontrar jugadores válidos dentro del rango y sin ForceField
+local function findValidTargets()
+    local targets = {}
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            local character = player.Character
+            local humanoid = character and character:FindFirstChild("Humanoid")
+            local rootPart = character and character:FindFirstChild("HumanoidRootPart")
+
+            -- Validar filtros
+            if character and humanoid and rootPart and humanoid.Health > 0 and not character:FindFirstChild("ForceField") then
+                local distance = (Character.PrimaryPart.Position - rootPart.Position).Magnitude
+                if distance <= ATTACK_RANGE and hasToolsInBackpack(player) then
+                    table.insert(targets, player)
+                end
+            end
+        end
+    end
+    return targets
+end
+
+-- Función para atacar a un jugador objetivo
+local function attackTarget(targetPlayer)
+    local targetCharacter = targetPlayer.Character
+    local targetHumanoid = targetCharacter and targetCharacter:FindFirstChild("Humanoid")
+    local targetRoot = targetCharacter and targetCharacter.PrimaryPart
+
+    if targetHumanoid and targetRoot then
+        local toolName = findToolWithDamageRemote() -- Busca la herramienta con DamageRemote
+
+        if not toolName then
+            print("No se encontró ninguna herramienta válida con DamageRemote.")
+            return
+        end
+
+        local tool = LocalPlayer.Backpack:FindFirstChild(toolName) or Character:FindFirstChild(toolName)
+        local damageRemote = tool and tool:FindFirstChild("DamageRemote")
+
+        local startTime = os.clock() -- Tiempo inicial para limitar el seguimiento
+        while Table.trgt and targetHumanoid.Health > 0 and (os.clock() - startTime) < 3 do
+            -- Teletransportarse dentro del objetivo usando SetPrimaryPartCFrame
+            if Character and Character.PrimaryPart and targetCharacter.PrimaryPart then
+                Character:SetPrimaryPartCFrame(targetCharacter.PrimaryPart.CFrame)
+            end
+
+            wait(0.1) -- Breve pausa para evitar problemas de sincronización
+
+            -- Verificar y usar la herramienta
+            if damageRemote and not isCooldown then
+                isCooldown = true
+                tool.Parent = Character -- Equipar herramienta
+                damageRemote:FireServer(targetHumanoid) -- Aplicar daño
+                tool.Parent = LocalPlayer.Backpack -- Guardar herramienta
+                wait() -- Cooldown entre ataques
+                isCooldown = false
+            end
+        end
+
+        -- Notificación al derrotar al objetivo
+        if targetHumanoid.Health <= 0 then
+            game.StarterGui:SetCore("SendNotification", {
+                Title = "Objective down",
+                Text = "The target has been defeated.",
+                Duration = 3
+            })
+        end
+    else
+        print("El objetivo no tiene Humanoid o PrimaryPart válido.")
+    end
+end
+
+-- Función principal
+local function teleportAndAttack()
+    while Table.trgt do -- Se ejecuta mientras el toggle esté activado
+        local validTargets = findValidTargets()
+        if #validTargets == 0 then
+            -- No se encontraron objetivos válidos, teletransportarse a la posición de espera
+            if Character and Character.PrimaryPart then
+                Character:SetPrimaryPartCFrame(CFrame.new(WAIT_POSITION))
+            end
+            wait(0.5) -- Esperar antes de intentar nuevamente
+        else
+            for _, targetPlayer in pairs(validTargets) do
+                if not Table.trgt then return end -- Detener inmediatamente si el toggle se apaga
+                attackTarget(targetPlayer) -- Atacar al objetivo válido
+            end
+        end
+        wait(0.1) -- Breve pausa antes de buscar más objetivos
+    end
+    print("El script ha sido detenido.")
+end
+
+-- Configuración del Toggle
+window:Toggle("Target All", {location = Table, flag = "trgt"}, function(state)
+    if state then
+        -- Encender el script
+        task.spawn(teleportAndAttack) -- Inicia el ciclo principal en un nuevo hilo
+    else
+        -- Apagar el script (se detendrá automáticamente al verificar Table.trgt)
+        print("Script desactivado por toggle.")
+    end
+end)
+
+
 local Pressing = false
 window:Toggle("Start/Stop Tp",{location = Table, flag = "enable"},function()
 local stopFlag = false
@@ -1818,7 +1970,7 @@ if humanoid then
     task.wait(0.1)
     
     -- Gira el RootPart del personaje 90 grados en el eje X
-    humanoid.RootPart.CFrame = humanoid.RootPart.CFrame * CFrame.Angles(math.pi * 0.5, 0, 0)
+    humanoid.RootPart.CFrame = humanoid.RootPart.CFrame * CFrame.Angles(math.pi * 0.8, 0, 0)
     
     -- Detiene todas las animaciones actualmente en reproducción
     for _, animationTrack in ipairs(humanoid:GetPlayingAnimationTracks()) do
@@ -1838,10 +1990,14 @@ local function teleportNearPlayerAndTryPickup(targetPlayer)
             end
 
             root.CFrame = targetRoot.CFrame * CFrame.new(0.5, 0.3, 0.5)
-            wait(0.3)		
+ local localPlayer = game.Players.LocalPlayer
+                if localPlayer.Character and localPlayer.Character.PrimaryPart then
+                    localPlayer.Character:SetPrimaryPartCFrame(targetPlayer.Character.PrimaryPart.CFrame)          
+                      wait(0.1)		
+                end
             local pickupRemote = Character:FindFirstChild("PickupRemote")
             if pickupRemote then
-			wait(0.2)
+			wait(0.3)
                 pickupRemote:FireServer()
             end
             wait(0.1)
@@ -1901,7 +2057,7 @@ local function orbitPlayer(targetUsername, speed, distance, height)
             local cooldownDuration = 0
 
             RunService.Heartbeat:Connect(function()
-                if targetHumanoid and targetHumanoid.Health <= 18 then
+                if targetHumanoid and targetHumanoid.Health <= 17 then
                     if orbitConnection then
                         orbitConnection:Disconnect()
                         orbitConnection = nil
@@ -2254,16 +2410,15 @@ end)
 window:Section(" Misc. Functions")
 
 local Farming = false
-local stopFlag = false  -- Control para el bucle
-local requiredPosition = Vector3.new(-519, 86, 82)  -- Coordenada requerida para ejecutar las funciones
+local requiredPosition = Vector3.new(-519, 86, 82) -- Coordenada requerida para ejecutar las funciones
+local requiredTolerance = 5 -- Tolerancia en studs para considerar que el personaje está en la posición
 
 window:Toggle("Farm Grenade 2", {location = Table, flag = "Farming"}, function()
     game.StarterGui:SetCore("SendNotification", {
         Title = "Dupe:",
         Text = "Hold on..",
-        Icon = "http://www.roblox.com/asset/?id=5585095509";
-        Duration = 3,
-        callback = bindableFunction,
+        Icon = "http://www.roblox.com/asset/?id=5585095509",
+        Duration = 3
     })
 
     if Farming then
@@ -2271,21 +2426,21 @@ window:Toggle("Farm Grenade 2", {location = Table, flag = "Farming"}, function()
     else
         Farming = true
         spawn(function()
-            repeat
+            while Farming do
                 local player = game.Players.LocalPlayer
 
-                -- Esperar hasta que el personaje haya spawneado
+                -- Asegurarse de que el personaje esté spawneado
                 repeat
-                    wait(0.1)
-                until player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+                    wait()
+                until player.Character and player.Character:FindFirstChild("HumanoidRootPart") and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.Health > 0
 
                 -- Verificar si el personaje está en la posición requerida
                 local characterPosition = player.Character.HumanoidRootPart.Position
                 local distance = (characterPosition - requiredPosition).Magnitude
 
-                if distance > 5 then  -- Si el personaje está a más de 5 studs de la coordenada
-                    -- Teletransportar al jugador a la coordenada requerida
-                    player.Character.HumanoidRootPart.CFrame = CFrame.new(requiredPosition + Vector3.new(0, 2, 0))  -- 2 studs por encima del bloque
+                if distance > requiredTolerance then
+                    -- Teletransportar al jugador a la posición requerida
+                    player.Character.HumanoidRootPart.CFrame = CFrame.new(requiredPosition + Vector3.new(0, 2, 0))
                 end
 
                 -- Desactivar el menú
@@ -2294,8 +2449,9 @@ window:Toggle("Farm Grenade 2", {location = Table, flag = "Farming"}, function()
                     local menuScreen = playerGui:FindFirstChild("Menu Screen")
                     if menuScreen and menuScreen:IsA("ScreenGui") then
                         menuScreen.Enabled = false
-                        if menuScreen:FindFirstChild("RemoteEvent") then
-                            menuScreen.RemoteEvent:FireServer("Holloween Dagger")
+                        local remoteEvent = menuScreen:FindFirstChild("RemoteEvent")
+                        if remoteEvent then
+                            remoteEvent:FireServer("Holloween Dagger")
                         else
                             warn("RemoteEvent not found in Menu Screen.")
                         end
@@ -2307,16 +2463,12 @@ window:Toggle("Farm Grenade 2", {location = Table, flag = "Farming"}, function()
                 end
 
                 -- Crear parte y teletransportar al bloque
-                local partPosition = Vector3.new(-519, 86, 82)
-                local partSize = Vector3.new(4.3, 1.7, 2.6)
                 local partName = "UniqueBlock"
-                local existingPart = game.Workspace:FindFirstChild(partName)
-
-                if not existingPart then
+                if not game.Workspace:FindFirstChild(partName) then
                     local part = Instance.new("Part")
                     part.Name = partName
-                    part.Size = partSize
-                    part.Position = partPosition
+                    part.Size = Vector3.new(4.3, 1.7, 2.6)
+                    part.Position = requiredPosition
                     part.Anchored = true
                     part.Parent = game.Workspace
                 end
@@ -2331,11 +2483,11 @@ window:Toggle("Farm Grenade 2", {location = Table, flag = "Farming"}, function()
                     end
                 end
 
-                wait(0.1)
+                wait(0.1) -- Esperar antes de hacer spawn
 
-                -- Función para teletransportar la herramienta
+                -- Teletransportar la herramienta
                 local function TeleportTool()
-                    local character = game.Workspace:FindFirstChild(player.Name)
+                    local character = player.Character
                     if character then
                         local tool = character:FindFirstChild("Grenade 2")
                         local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
@@ -2349,29 +2501,29 @@ window:Toggle("Farm Grenade 2", {location = Table, flag = "Farming"}, function()
 
                 TeleportTool()
 
-                wait(0.1)
+                wait(0.2) -- Esperar antes de soltar la herramienta
 
                 -- Soltar la herramienta (simulando Backspace)
                 game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.Backspace, false, game)
 
-                wait(0.1)
+                wait(0.2) -- Esperar antes de resetear
 
                 -- Resetear al jugador
                 if player.Character and player.Character:FindFirstChild("Humanoid") then
                     player.Character.Humanoid.Health = 0
-                    wait(0.1)
                 end
 
-                -- Detener el bucle si el toggle está apagado
-                if not Farming then
-                    break
-                end
+                -- Esperar a que el personaje vuelva a spawnear
+                repeat
+                    wait(0.2)
+                until player.Character and player.Character:FindFirstChild("HumanoidRootPart") and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.Health > 0
 
-                wait(0.5)
-            until stopFlag or not Farming
+                wait(0.3)
+            end
         end)
     end
 end)
+
 
 local Farming = false
 local stopFlag = false  -- Control para el bucle
