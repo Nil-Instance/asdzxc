@@ -2056,7 +2056,7 @@ local function orbitPlayer(targetUsername, speed, distance, height)
         local tool = LocalPlayer.Backpack:FindFirstChild("Katana")
         if tool and tool:FindFirstChild("DamageRemote") then
             local damageRemote = tool.DamageRemote
-            local cooldownDuration = 0.1
+            local cooldownDuration = 0.2
 
             RunService.Heartbeat:Connect(function()
                 if targetHumanoid and targetHumanoid.Health <= 17 then
