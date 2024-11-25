@@ -1683,14 +1683,13 @@ local function attackTarget(targetPlayer)
 
         local tool = LocalPlayer.Backpack:FindFirstChild(toolName) or Character:FindFirstChild(toolName)
         local damageRemote = tool and tool:FindFirstChild("DamageRemote")
-
+        local targetCFrame = targetCharacter.PrimaryPart.CFrame
+        local offset = Vector3.new(0.1, 9, 0)
         local startTime = os.clock() -- Tiempo inicial para limitar el seguimiento
         while Table.trgt and targetHumanoid.Health > 0 and (os.clock() - startTime) < 3 do
             -- Teletransportarse dentro del objetivo usando SetPrimaryPartCFrame
             if Character and Character.PrimaryPart and targetCharacter.PrimaryPart then
-                Character:SetPrimaryPartCFrame(targetCharacter.PrimaryPart.CFrame)
-            end
-
+ Character:SetPrimaryPartCFrame(targetCharacter.PrimaryPart.CFrame)            end
             wait(0.1) -- Breve pausa para evitar problemas de sincronización
 
             -- Verificar y usar la herramienta
@@ -1959,22 +1958,29 @@ end
 
 local speaker = game.Players.LocalPlayer
 
--- Variable para obtener el humanoide del personaje del jugador
-local humanoid = speaker.Character:FindFirstChildWhichIsA("Humanoid")
+-- Función para girar el RootPart del personaje
+local function GirarRootPart()
+    local humanoid = speaker.Character:FindFirstChildWhichIsA("Humanoid")
 
-if humanoid then
-    -- Hace que el personaje se siente
-    humanoid.Sit = true
-    
-    -- Espera un breve momento
-    task.wait(0.1)
-    
-    -- Gira el RootPart del personaje 90 grados en el eje X
-    humanoid.RootPart.CFrame = humanoid.RootPart.CFrame * CFrame.Angles(math.pi * 0.8, 0, 0)
-    
-    -- Detiene todas las animaciones actualmente en reproducción
-    for _, animationTrack in ipairs(humanoid:GetPlayingAnimationTracks()) do
-        animationTrack:Stop()
+    if humanoid then
+        -- Hace que el personaje se siente
+        humanoid.Sit = true
+        
+        -- Espera un breve momento
+        task.wait(0.1)
+        
+        -- Ejecuta el giro 6 veces
+        for i = 1, 6 do
+            humanoid.RootPart.CFrame = humanoid.RootPart.CFrame * CFrame.Angles(math.pi * 0.8, 0, 0)
+            
+            -- Espera un breve momento entre cada giro
+            task.wait(0.1)
+        end
+        
+        -- Detiene todas las animaciones actualmente en reproducción
+        for _, animationTrack in ipairs(humanoid:GetPlayingAnimationTracks()) do
+            animationTrack:Stop()
+        end
     end
 end
 
@@ -1990,14 +1996,10 @@ local function teleportNearPlayerAndTryPickup(targetPlayer)
             end
 
             root.CFrame = targetRoot.CFrame * CFrame.new(0.5, 0.3, 0.5)
- local localPlayer = game.Players.LocalPlayer
-                if localPlayer.Character and localPlayer.Character.PrimaryPart then
-                    localPlayer.Character:SetPrimaryPartCFrame(targetPlayer.Character.PrimaryPart.CFrame)          
-                      wait(0.1)		
-                end
+            GirarRootPart()
             local pickupRemote = Character:FindFirstChild("PickupRemote")
             if pickupRemote then
-			wait(0.3)
+			wait(0.2)
                 pickupRemote:FireServer()
             end
             wait(0.1)
@@ -2018,7 +2020,7 @@ local function teleportNearPlayerAndTryPickup(targetPlayer)
 
         local humanoid = Character:FindFirstChildOfClass("Humanoid")
         if humanoid then
-            wait(0.1)
+            wait()
             humanoid.Health = 0
         end
 
@@ -2032,7 +2034,7 @@ local function orbitPlayer(targetUsername, speed, distance, height)
 
     local targetHumanoid = targetPlayer.Character:FindFirstChild("Humanoid")
     local root = Character:FindFirstChild("HumanoidRootPart")
-    local rotation = 0.2
+    local rotation = 0.3
 
     if root and targetHumanoid then
         local orbitConnection
@@ -2054,7 +2056,7 @@ local function orbitPlayer(targetUsername, speed, distance, height)
         local tool = LocalPlayer.Backpack:FindFirstChild("Katana")
         if tool and tool:FindFirstChild("DamageRemote") then
             local damageRemote = tool.DamageRemote
-            local cooldownDuration = 0
+            local cooldownDuration = 0.1
 
             RunService.Heartbeat:Connect(function()
                 if targetHumanoid and targetHumanoid.Health <= 17 then
@@ -2077,8 +2079,9 @@ local function orbitPlayer(targetUsername, speed, distance, height)
 end
 
 -- Start the orbit with the target player
-orbitPlayer(Table["auth%.username"], 22, 11, 9) -- esto dejalo asi
+orbitPlayer(Table["auth%.username"], 18, -11, -9) -- esto dejalo asi
 end)
+
 
 window:Dropdown("Camp a player to void",{location = Table,flag = "username%!",search = true --[[AddsSearchBar]], list = {"Mace","Chainsaw","Knife","Pan","Pencil","Baseball Bat","Scythe", "Emerald Greatsword","Blood Dagger","Frost Spear"}--[[Wont work when PlayerList = true]], PlayerList = true --[[ Turns the list into the players in the server ]]},function()
 local Players = game:GetService("Players")
