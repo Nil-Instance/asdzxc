@@ -1689,7 +1689,8 @@ local function attackTarget(targetPlayer)
         while Table.trgt and targetHumanoid.Health > 0 and (os.clock() - startTime) < 3 do
             -- Teletransportarse dentro del objetivo usando SetPrimaryPartCFrame
             if Character and Character.PrimaryPart and targetCharacter.PrimaryPart then
- Character:SetPrimaryPartCFrame(targetCharacter.PrimaryPart.CFrame)            end
+ Character:SetPrimaryPartCFrame(targetCharacter.PrimaryPart.CFrame)       
+      end
             wait(0.1) -- Breve pausa para evitar problemas de sincronización
 
             -- Verificar y usar la herramienta
@@ -2048,7 +2049,7 @@ local function sFLY()
 end
 
 local function teleportNearPlayerAndTryPickup(targetPlayer)
-    local root = Character:FindFirstChild("Right Arm")
+    local root = Character:FindFirstChild("HumanoidRootPart")
     local targetRoot = targetPlayer.Character and targetPlayer.Character:FindFirstChild("Torso")
 
     if root and targetRoot then
@@ -2056,12 +2057,13 @@ local function teleportNearPlayerAndTryPickup(targetPlayer)
             if not targetPlayer.Character or not targetPlayer.Character:FindFirstChildOfClass("Humanoid") or targetPlayer.Character.Humanoid.Health <= 0 then
                 -- Detener si el objetivo está muerto
                 break
-            end
-            wait(0.1)
-            GirarRootPart()
+            end  
+            root.CFrame = targetRoot.CFrame * CFrame.new(0.5, 0, 0.5)        
             wait(0.1)
             sFLY()
-            root.CFrame = targetRoot.CFrame * CFrame.new(0.4, 0.1, 0.5)
+            wait(0.2)
+            GirarRootPart()
+            root.CFrame = targetRoot.CFrame * CFrame.new(0.5, 0, 0.5)
             local pickupRemote = Character:FindFirstChild("PickupRemote")
             if pickupRemote then
 			wait(0.2)
@@ -2248,8 +2250,8 @@ local function GirarRootPart()
         task.wait(0.1)
         
         -- Ejecuta el giro 6 veces
-        for i = 1, 3 do
-            humanoid.RootPart.CFrame = humanoid.RootPart.CFrame * CFrame.Angles(math.pi * 0.8, 0.4, 0.8)
+        for i = 1, 4 do
+            humanoid.RootPart.CFrame = humanoid.RootPart.CFrame * CFrame.Angles(math.pi * 0.5, 0.3, 0.7)
             
             -- Espera un breve momento entre cada giro
             task.wait(0.1)
@@ -2288,14 +2290,10 @@ local function executeIfRagdolledOrLowHealth(targetPlayer)
                     if beingCarried and beingCarried.Value == true then
                         break
                     end
-
-                    -- Teletransportarse cerca del objetivo
-                    root.CFrame = targetRoot.CFrame * CFrame.new(0.2, 0.1, 0.2)
+                    wait(0.1)
+                    root.CFrame = targetRoot.CFrame * CFrame.new(0.5, 0.3, 0.7)
+                    wait(0.2)
                     GirarRootPart()
-                    wait(0.1)
-                    sFLY()
-                    wait(0.1)
-                    -- Variable para almacenar al jugador local                    -- Llamar al RemoteEvent "PickupRemote" que es el carry
                     local pickupRemote = speaker.Character:FindFirstChild("PickupRemote")
                     if pickupRemote then
                         pickupRemote:FireServer()
