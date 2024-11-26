@@ -3133,4 +3133,4 @@ end
 end)
 
 -- Llama a la función para mostrar una notificación
-showNotification("¡New Updates!", "¡Loop Kill With Anti-Hit!", 5) -- Título, texto, duración
+showNotification("¡New Updates!", "¡Auto Void 100% Effective, Enjoy!", 4) -- Título, texto, duración
