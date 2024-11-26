@@ -1970,8 +1970,8 @@ local function GirarRootPart()
         task.wait(0.1)
         
         -- Ejecuta el giro 6 veces
-        for i = 1, 6 do
-            humanoid.RootPart.CFrame = humanoid.RootPart.CFrame * CFrame.Angles(math.pi * 0.8, 0, 0)
+        for i = 1, 3 do
+            humanoid.RootPart.CFrame = humanoid.RootPart.CFrame * CFrame.Angles(math.pi * 0.8, 0.4, 0.8)
             
             -- Espera un breve momento entre cada giro
             task.wait(0.1)
@@ -1984,9 +1984,72 @@ local function GirarRootPart()
     end
 end
 
+local function sFLY()
+    local Players = game:GetService("Players")
+    local player = Players.LocalPlayer
+
+    local FLYING = false
+    local CONTROL = {F = 0, B = 0, L = 0, R = 0, Q = 0, E = 0}
+    local SPEED = 0
+
+    local function FLY()
+        FLYING = true
+        local T = player.Character:FindFirstChild("HumanoidRootPart")
+        local BG = Instance.new('BodyGyro', T)
+        local BV = Instance.new('BodyVelocity', T)
+
+        BG.P = 9e4
+        BG.maxTorque = Vector3.new(9e9, 9e9, 9e9)
+        BG.cframe = T.CFrame
+
+        BV.maxForce = Vector3.new(9e9, 9e9, 9e9)
+        BV.velocity = Vector3.zero
+
+        game:GetService("RunService").RenderStepped:Connect(function()
+            if FLYING then
+                BV.velocity = ((workspace.CurrentCamera.CFrame.LookVector * (CONTROL.F + CONTROL.B)) +
+                    ((workspace.CurrentCamera.CFrame.RightVector * (CONTROL.L + CONTROL.R)))) * SPEED
+                BG.cframe = workspace.CurrentCamera.CFrame
+            else
+                BV:Destroy()
+                BG:Destroy()
+            end
+        end)
+    end
+
+    local function setupControls()
+        local UserInputService = game:GetService("UserInputService")
+        UserInputService.InputBegan:Connect(function(input, gameProcessed)
+            if gameProcessed then return end
+            local key = input.KeyCode
+
+            if key == Enum.KeyCode.W then CONTROL.F = 1 SPEED = 50 end
+            if key == Enum.KeyCode.S then CONTROL.B = -1 SPEED = 50 end
+            if key == Enum.KeyCode.A then CONTROL.L = -1 SPEED = 50 end
+            if key == Enum.KeyCode.D then CONTROL.R = 1 SPEED = 50 end
+            if key == Enum.KeyCode.E then CONTROL.Q = 2 SPEED = 50 end
+            if key == Enum.KeyCode.Q then CONTROL.E = -2 SPEED = 50 end
+        end)
+
+        UserInputService.InputEnded:Connect(function(input)
+            local key = input.KeyCode
+
+            if key == Enum.KeyCode.W then CONTROL.F = 0 end
+            if key == Enum.KeyCode.S then CONTROL.B = 0 end
+            if key == Enum.KeyCode.A then CONTROL.L = 0 end
+            if key == Enum.KeyCode.D then CONTROL.R = 0 end
+            if key == Enum.KeyCode.E then CONTROL.Q = 0 end
+            if key == Enum.KeyCode.Q then CONTROL.E = 0 end
+        end)
+    end
+
+    setupControls()
+    FLY()
+end
+
 local function teleportNearPlayerAndTryPickup(targetPlayer)
-    local root = Character:FindFirstChild("HumanoidRootPart")
-    local targetRoot = targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart")
+    local root = Character:FindFirstChild("Right Arm")
+    local targetRoot = targetPlayer.Character and targetPlayer.Character:FindFirstChild("Torso")
 
     if root and targetRoot then
         while not isBeingCarried(targetPlayer) do
@@ -1994,9 +2057,11 @@ local function teleportNearPlayerAndTryPickup(targetPlayer)
                 -- Detener si el objetivo está muerto
                 break
             end
-
-            root.CFrame = targetRoot.CFrame * CFrame.new(0.5, 0.3, 0.5)
+            wait(0.1)
             GirarRootPart()
+            wait(0.1)
+            sFLY()
+            root.CFrame = targetRoot.CFrame * CFrame.new(0.4, 0.1, 0.5)
             local pickupRemote = Character:FindFirstChild("PickupRemote")
             if pickupRemote then
 			wait(0.2)
@@ -2053,12 +2118,16 @@ local function orbitPlayer(targetUsername, speed, distance, height)
             root.CFrame = CFrame.new(targetHumanoid.RootPart.Position) * CFrame.Angles(0, math.rad(rotation), 0.5) * CFrame.new(distance, height, 0)
         end)
 
-        local tool = LocalPlayer.Backpack:FindFirstChild("Katana")
-        if tool and tool:FindFirstChild("DamageRemote") then
-            local damageRemote = tool.DamageRemote
-            local cooldownDuration = 0.2
-
-            RunService.Heartbeat:Connect(function()
+local tool = LocalPlayer.Backpack:FindFirstChild("Katana")
+if tool and tool:FindFirstChild("DamageRemote") then
+    local damageRemote = tool.DamageRemote
+    local cooldownDuration = 0
+    local heartbeatConnection
+    heartbeatConnection = RunService.Heartbeat:Connect(function()
+        if targetHumanoid.Health <= 17 then
+            print("La salud es 17 o menos, deteniendo el evento.")
+            heartbeatConnection:Disconnect()
+        end
                 if targetHumanoid and targetHumanoid.Health <= 17 then
                     if orbitConnection then
                         orbitConnection:Disconnect()
@@ -2102,6 +2171,97 @@ local function checkRagdollOrLowHealth(targetChar)
     return false
 end
 
+local function sFLY()
+    local Players = game:GetService("Players")
+    local player = Players.LocalPlayer
+
+    local FLYING = false
+    local CONTROL = {F = 0, B = 0, L = 0, R = 0, Q = 0, E = 0}
+    local SPEED = 0
+
+    local function FLY()
+        FLYING = true
+        local T = player.Character:FindFirstChild("HumanoidRootPart")
+        local BG = Instance.new('BodyGyro', T)
+        local BV = Instance.new('BodyVelocity', T)
+
+        BG.P = 9e4
+        BG.maxTorque = Vector3.new(9e9, 9e9, 9e9)
+        BG.cframe = T.CFrame
+
+        BV.maxForce = Vector3.new(9e9, 9e9, 9e9)
+        BV.velocity = Vector3.zero
+
+        game:GetService("RunService").RenderStepped:Connect(function()
+            if FLYING then
+                BV.velocity = ((workspace.CurrentCamera.CFrame.LookVector * (CONTROL.F + CONTROL.B)) +
+                    ((workspace.CurrentCamera.CFrame.RightVector * (CONTROL.L + CONTROL.R)))) * SPEED
+                BG.cframe = workspace.CurrentCamera.CFrame
+            else
+                BV:Destroy()
+                BG:Destroy()
+            end
+        end)
+    end
+
+    local function setupControls()
+        local UserInputService = game:GetService("UserInputService")
+        UserInputService.InputBegan:Connect(function(input, gameProcessed)
+            if gameProcessed then return end
+            local key = input.KeyCode
+
+            if key == Enum.KeyCode.W then CONTROL.F = 1 SPEED = 50 end
+            if key == Enum.KeyCode.S then CONTROL.B = -1 SPEED = 50 end
+            if key == Enum.KeyCode.A then CONTROL.L = -1 SPEED = 50 end
+            if key == Enum.KeyCode.D then CONTROL.R = 1 SPEED = 50 end
+            if key == Enum.KeyCode.E then CONTROL.Q = 2 SPEED = 50 end
+            if key == Enum.KeyCode.Q then CONTROL.E = -2 SPEED = 50 end
+        end)
+
+        UserInputService.InputEnded:Connect(function(input)
+            local key = input.KeyCode
+
+            if key == Enum.KeyCode.W then CONTROL.F = 0 end
+            if key == Enum.KeyCode.S then CONTROL.B = 0 end
+            if key == Enum.KeyCode.A then CONTROL.L = 0 end
+            if key == Enum.KeyCode.D then CONTROL.R = 0 end
+            if key == Enum.KeyCode.E then CONTROL.Q = 0 end
+            if key == Enum.KeyCode.Q then CONTROL.E = 0 end
+        end)
+    end
+
+    setupControls()
+    FLY()
+end
+
+local speaker = game.Players.LocalPlayer
+
+-- Función para girar el RootPart del personaje
+local function GirarRootPart()
+    local humanoid = speaker.Character:FindFirstChildWhichIsA("Humanoid")
+
+    if humanoid then
+        -- Hace que el personaje se siente
+        humanoid.Sit = true
+        
+        -- Espera un breve momento
+        task.wait(0.1)
+        
+        -- Ejecuta el giro 6 veces
+        for i = 1, 3 do
+            humanoid.RootPart.CFrame = humanoid.RootPart.CFrame * CFrame.Angles(math.pi * 0.8, 0.4, 0.8)
+            
+            -- Espera un breve momento entre cada giro
+            task.wait(0.1)
+        end
+        
+        -- Detiene todas las animaciones actualmente en reproducción
+        for _, animationTrack in ipairs(humanoid:GetPlayingAnimationTracks()) do
+            animationTrack:Stop()
+        end
+    end
+end
+
 -- Funcion para ejecutar todas las acciones si el jugador esta en estado Ragdolled o con baja salud
 local function executeIfRagdolledOrLowHealth(targetPlayer)
     local targetChar = Workspace:FindFirstChild(targetPlayer.Name)
@@ -2131,29 +2291,11 @@ local function executeIfRagdolledOrLowHealth(targetPlayer)
 
                     -- Teletransportarse cerca del objetivo
                     root.CFrame = targetRoot.CFrame * CFrame.new(0.2, 0.1, 0.2)
+                    GirarRootPart()
                     wait(0.1)
-                    -- Variable para almacenar al jugador local
-local speaker = game.Players.LocalPlayer
-
--- Variable para obtener el humanoide del personaje del jugador
-local humanoid = speaker.Character:FindFirstChildWhichIsA("Humanoid")
-
-if humanoid then
-    -- Hace que el personaje se siente
-    humanoid.Sit = true
-    
-    -- Espera un breve momento
-    task.wait(0.1)
-    
-    -- Gira el RootPart del personaje 90 grados en el eje X
-    humanoid.RootPart.CFrame = humanoid.RootPart.CFrame * CFrame.Angles(math.pi * 0.5, 0, 0)
-    
-    -- Detiene todas las animaciones actualmente en reproducción
-    for _, animationTrack in ipairs(humanoid:GetPlayingAnimationTracks()) do
-        animationTrack:Stop()
-    end
-end
-                    -- Llamar al RemoteEvent "PickupRemote" que es el carry
+                    sFLY()
+                    wait(0.1)
+                    -- Variable para almacenar al jugador local                    -- Llamar al RemoteEvent "PickupRemote" que es el carry
                     local pickupRemote = speaker.Character:FindFirstChild("PickupRemote")
                     if pickupRemote then
                         pickupRemote:FireServer()
@@ -2170,13 +2312,8 @@ end
         local character = game.Players.LocalPlayer.Character
       local rootPart = character and character:FindFirstChild("HumanoidRootPart")
             if rootPart then
-
-            wait()
-                
+            wait(0.1) 
             local bool = true
-
-wait()
-
 if bool then
     game.Workspace.FallenPartsDestroyHeight = 0 / 0
 else
@@ -2983,7 +3120,6 @@ end
 game:GetService("Players").PlayerAdded:Connect(function(player)
     -- Esperar un poco para que el jugador esté completamente cargado
     wait(2)
-
     -- Llamar a la función para notificar a un jugador en el momento que entra al juego
     notifyActiveSigmas(player)
 end)
